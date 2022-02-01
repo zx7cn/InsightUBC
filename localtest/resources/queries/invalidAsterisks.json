@@ -1,0 +1,19 @@
+{
+  "title": "invalid asterisks",
+  "input": {
+    "WHERE": {
+      "IS": {
+        "courses_uuid": "38*25"
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses_dept",
+        "courses_uuid"
+      ]
+
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}

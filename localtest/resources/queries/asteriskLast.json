@@ -1,0 +1,20 @@
+{
+  "title": "asterisk at the end",
+  "input": {
+    "WHERE": {
+      "IS": {
+        "courses_uuid": "3805*"
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses_dept",
+        "courses_uuid"
+      ]
+
+    }
+  },
+  "errorExpected": false,
+  "expected": [{"courses_dept":"math","courses_uuid":"3805"},{"courses_dept":"plan","courses_uuid":"38058"},{"courses_dept":"plan","courses_uuid":"38059"}]
+}
+

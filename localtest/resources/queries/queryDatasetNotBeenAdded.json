@@ -1,0 +1,19 @@
+{
+  "title": "query a dataset that has not been added",
+  "input": {
+    "WHERE": {
+      "GT": {
+        "courses2_avg": 97
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses2_dept",
+        "courses2_avg"
+      ],
+      "ORDER": "courses2_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}

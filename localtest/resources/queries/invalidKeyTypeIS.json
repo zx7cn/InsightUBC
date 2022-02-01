@@ -1,0 +1,19 @@
+{
+  "title": "invalid key type IS",
+  "input": {
+    "WHERE": {
+      "IS": {
+        "courses_avg": 70
+      }
+    },
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses_dept",
+        "courses_avg"
+      ],
+      "ORDER": "courses_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}
