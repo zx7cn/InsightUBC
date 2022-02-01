@@ -1,0 +1,14 @@
+{
+  "title": "reject query with missing WHERE key with InsightError",
+  "input":{
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses_dept",
+        "courses_avg"
+      ],
+      "ORDER": "courses_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}

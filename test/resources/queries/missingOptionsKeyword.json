@@ -1,0 +1,12 @@
+{
+  "title": "reject query with missing OPTIONS Key with InsightError",
+  "input": {
+    "WHERE": {
+      "GT": {
+        "courses_avg": 97
+      }
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}

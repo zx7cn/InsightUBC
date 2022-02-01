@@ -1,0 +1,15 @@
+{
+  "title": "reject response with >5000 results with ResultTooLargeError",
+  "input":{
+    "WHERE": {},
+    "OPTIONS": {
+      "COLUMNS": [
+        "courses_dept",
+        "courses_avg"
+      ],
+      "ORDER": "courses_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "ResultTooLargeError"
+}

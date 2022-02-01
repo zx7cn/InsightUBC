@@ -1,0 +1,15 @@
+{
+  "title": "reject query with missing COLUMN Key with InsightError",
+  "input": {
+    "WHERE": {
+      "GT": {
+        "courses_avg": 97
+      }
+    },
+    "OPTIONS": {
+      "ORDER": "courses_avg"
+    }
+  },
+  "errorExpected": true,
+  "expected": "InsightError"
+}
