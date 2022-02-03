@@ -12,6 +12,7 @@
 		"decimal.js": "10.3.1",
 		"express": "4.17.2",
 		"fs-extra": "10.0.0",
+		"is-zip-file": "^1.0.2",
 		"jszip": "^3.7.1",
 		"parse5": "6.0.1"
 	},
