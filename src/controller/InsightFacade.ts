@@ -6,7 +6,7 @@ import {
 	InsightResult,
 	NotFoundError
 } from "./IInsightFacade";
-import {datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
+import {countRows, datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
 
 /**
@@ -31,7 +31,7 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new InsightError("id cannot be empty or null"));
 		}
 
-		if(kind !== InsightDatasetKind.Courses) {
+		if(kind !== "courses") {
 			return Promise.reject(new InsightError("invalid dataset kind"));
 		}
 
@@ -39,28 +39,24 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
 
-		if(!validJSONFile(content)) {
-			return Promise.reject(new InsightError("dataset not in JSON format"));
-		}
+		return unzipFile(content).then((parsedDataArray) => {
+			if(countRows(parsedDataArray) === 0) {
+				return Promise.reject(new InsightError("no valid section"));
+			}
 
-		if(parseDataset(content).length < 1) {
-			return Promise.reject(new InsightError("dataset has no valid course section"));
-		}
-
-		const newDataset: InsightDataset = {
-			id: id,
-			kind: kind,
-			numRows: parseDataset(content).length
-		};
-
-		this.datasets.push(newDataset);
-		fs.writeFileSync("./data" + id + ".json", JSON.stringify(parseDataset(content)));
-
-		let addedIds: string[] = [];
-		for(const i of this.datasets) {
-			addedIds.push(i.id);
-		}
-		return Promise.resolve(addedIds);
+			let newDataset: InsightDataset = {
+				id: id,
+				kind: kind,
+				numRows: countRows(parsedDataArray)
+			};
+			this.datasets.push(newDataset);
+			fs.writeFileSync("./data" + id + ".json", JSON.stringify(this.datasets));
+			let addedIds: string[] = [];
+			for(const i of this.datasets) {
+				addedIds.push(i.id);
+			}
+			return Promise.resolve(addedIds);
+		});
 	}
 
 	public removeDataset(id: string): Promise<string> {

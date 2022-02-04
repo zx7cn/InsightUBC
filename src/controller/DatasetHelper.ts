@@ -1,4 +1,4 @@
-import {InsightDataset, InsightResult} from "./IInsightFacade";
+import {InsightDataset, InsightError, InsightResult} from "./IInsightFacade";
 import * as fs from "fs-extra";
 import JSZip from "jszip";
 
@@ -11,15 +11,30 @@ function datasetExists(id: string, dataset: InsightDataset[]): boolean {
 	return false;
 }
 
-function unzipFile(content: string): string[] {
+function unzipFile(content: string): Promise<any> {
 	let zip = new JSZip();
 	let filesArray: any[] = [];
-	zip.loadAsync(content, {base64: true}).then(function(data) {
+	let parsedDataArray: any[] = [];
+	return zip.loadAsync(content, {base64: true}).then(function(data) {
 		zip.folder("courses")?. forEach(function (relativePath, file) {
-			filesArray.push(file.async("string"));
+			filesArray.push(zip.file(file.name)?.async("string"));
+		});
+		return Promise.all(filesArray).then((items: string[]) => {
+			if(items.length > 0) {
+				items.forEach((course) => {
+					if (validJSONFile(course)) {
+						parsedDataArray.push(parseDataset(course));
+					} else {
+						return Promise.reject(new InsightError("not in JSON format"));
+					}
+				});
+			} else {
+				return Promise.reject(new InsightError("empty zip"));
+			}
+		}).then(()=> {
+			return Promise.resolve(parsedDataArray);
 		});
 	});
-	return filesArray;
 }
 
 function validJSONFile(file: any): boolean {
@@ -31,26 +46,26 @@ function validJSONFile(file: any): boolean {
 	}
 }
 
-function parseDataset(data: string): InsightResult[] {
+function parseDataset(data: any): any {
 	let parsedDatasets: InsightResult[] = [];
 	let course = JSON.parse(data);
 	for (let i of course.result) {
-		if (course.Subject !== undefined && course.Course !== undefined
-				&& course.Avg !== undefined && course.Professor !== undefined
-				&& course.Title !== undefined && course.Pass !== undefined
-				&& course.Fail !== undefined && course.Audit !== undefined
-				&& course.id !== undefined && course.Year !== undefined) {
+		if (i.Subject !== undefined && i.Course !== undefined
+				&& i.Avg !== undefined && i.Professor !== undefined
+				&& i.Title !== undefined && i.Pass !== undefined
+				&& i.Fail !== undefined && i.Audit !== undefined
+				&& i.id !== undefined && i.Year !== undefined) {
 
-			if (course.Section === "overall") {
-				course.Year = 1900;
+			if (i.Section === "overall") {
+				i.Year = 1900;
 			}
 
 			let parsedData: InsightResult = {
-				dept: course.Subject, id: course.Course,
-				avg: course.Avg, instructor: course.Professor,
-				title: course.Title, pass: course.Pass,
-				fail: course.Fail, audit: course.Audit,
-				uuid: course.id.toString(), year: Number(course.Year)
+				dept: i.Subject, id: i.Course,
+				avg: i.Avg, instructor: i.Professor,
+				title: i.Title, pass: i.Pass,
+				fail: i.Fail, audit: i.Audit,
+				uuid: i.id.toString(), year: Number(i.Year)
 			};
 			parsedDatasets.push(parsedData);
 		}
@@ -58,5 +73,15 @@ function parseDataset(data: string): InsightResult[] {
 	return parsedDatasets;
 }
 
+function countRows(array: any[]): number {
+	let numRows: number = 0;
+	let i: number = 0;
+	while(i < array.length) {
+		numRows = numRows + array[i].length;
+		i++;
+	}
+	return numRows;
+}
 
-export {datasetExists, parseDataset, validJSONFile, unzipFile};
+
+export {datasetExists, parseDataset, validJSONFile, unzipFile, countRows};

@@ -33,6 +33,7 @@ describe("InsightFacade", function () {
 		invalidFormat: "./test/resources/archives/invalid_format.zip",
 		invalidNoCourses: "./test/resources/archives/invalid_no_courses.zip",
 		invalidNoSections: "./test/resources/archives/invalid_no_sections.zip",
+		sm: "./test/resources/archives/single_multi_valid.zip"
 	};
 
 	before(function () {
@@ -72,6 +73,14 @@ describe("InsightFacade", function () {
 		it("Should add a valid dataset", function () {
 			const id: string = "courses";
 			const content: string = datasetContents.get("courses") ?? "";
+			const expected: string[] = [id];
+			return insightFacade.addDataset(id, content, InsightDatasetKind.Courses).then((result: string[]) => {
+				expect(result).to.deep.equal(expected);
+			});
+		});
+		it("Should add a valid dataset2", function () {
+			const id: string = "courses2";
+			const content: string = datasetContents.get("sm") ?? "";
 			const expected: string[] = [id];
 			return insightFacade.addDataset(id, content, InsightDatasetKind.Courses).then((result: string[]) => {
 				expect(result).to.deep.equal(expected);
@@ -192,6 +201,19 @@ describe("InsightFacade", function () {
 						id: "courses",
 						kind: InsightDatasetKind.Courses,
 						numRows: 64612,
+					}]);
+				});
+		});
+
+		it("should list one dataset2", function() {
+			const content: string = datasetContents.get("sm") ?? "";
+			return insightFacade.addDataset("sm", content, InsightDatasetKind.Courses)
+				.then((addedIds) => insightFacade.listDatasets())
+				.then((insightDatasets) => {
+					expect(insightDatasets).to.deep.equal( [{
+						id: "sm",
+						kind: InsightDatasetKind.Courses,
+						numRows: 8,
 					}]);
 				});
 		});
