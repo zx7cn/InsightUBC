@@ -1,6 +1,0 @@
-{
-  "title": "query must be object",
-  "input": null,
-  "errorExpected": true,
-  "expected": "InsightError"
-}
