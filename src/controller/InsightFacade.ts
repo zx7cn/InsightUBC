@@ -38,7 +38,6 @@ export default class InsightFacade implements IInsightFacade {
 		if(datasetExists(id, this.datasets)) {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
-
 		return unzipFile(content).then((parsedDataArray) => {
 			if(countRows(parsedDataArray) === 0) {
 				return Promise.reject(new InsightError("no valid section"));
@@ -50,7 +49,7 @@ export default class InsightFacade implements IInsightFacade {
 				numRows: countRows(parsedDataArray)
 			};
 			this.datasets.push(newDataset);
-			fs.writeFileSync("./data" + id + ".json", JSON.stringify(this.datasets));
+			fs.writeFileSync("./data" + id + ".json", JSON.stringify(parsedDataArray));
 			let addedIds: string[] = [];
 			for(const i of this.datasets) {
 				addedIds.push(i.id);
@@ -80,7 +79,6 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		fs.removeSync("./data" + id + ".json");
 		return Promise.resolve(id);
-
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {

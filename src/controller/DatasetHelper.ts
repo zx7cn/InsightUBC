@@ -15,12 +15,12 @@ function unzipFile(content: string): Promise<any> {
 	let zip = new JSZip();
 	let filesArray: any[] = [];
 	let parsedDataArray: any[] = [];
-	return zip.loadAsync(content, {base64: true}).then(function(data) {
-		zip.folder("courses")?. forEach(function (relativePath, file) {
+	return zip.loadAsync(content, {base64: true}).then(function (data) {
+		zip.folder("courses")?.forEach(function (relativePath, file) {
 			filesArray.push(zip.file(file.name)?.async("string"));
 		});
 		return Promise.all(filesArray).then((items: string[]) => {
-			if(items.length > 0) {
+			if (items.length > 0) {
 				items.forEach((course) => {
 					if (validJSONFile(course)) {
 						parsedDataArray.push(parseDataset(course));
@@ -31,9 +31,11 @@ function unzipFile(content: string): Promise<any> {
 			} else {
 				return Promise.reject(new InsightError("empty zip"));
 			}
-		}).then(()=> {
+		}).then(() => {
 			return Promise.resolve(parsedDataArray);
 		});
+	}).catch((e) => {
+		return Promise.reject(new InsightError("not a zip file"));
 	});
 }
 
@@ -82,6 +84,5 @@ function countRows(array: any[]): number {
 	}
 	return numRows;
 }
-
 
 export {datasetExists, parseDataset, validJSONFile, unzipFile, countRows};
