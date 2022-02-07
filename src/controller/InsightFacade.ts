@@ -15,20 +15,20 @@ import * as fs from "fs-extra";
  *
  */
 export default class InsightFacade implements IInsightFacade {
-	public datasets: InsightDataset[];
+	private datasets: InsightDataset[];
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasets = [];
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
+		if(id === "" || id === null) {
+			return Promise.reject(new InsightError("id cannot be empty or null"));
+		}
+
 		if(id.trim().length === 0 || id.includes("_")) {
 			return Promise.reject(new InsightError("id cannot only be whitespace or cannot contain " +
 				"an underscore"));
-		}
-
-		if(id === "" || id === null) {
-			return Promise.reject(new InsightError("id cannot be empty or null"));
 		}
 
 		if(kind !== "courses") {
@@ -59,13 +59,13 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public removeDataset(id: string): Promise<string> {
+		if(id === "" || id === null) {
+			return Promise.reject(new InsightError("id cannot be empty or null"));
+		}
+
 		if(id.trim().length === 0 || id.includes("_")) {
 			return Promise.reject(new InsightError("id cannot only be whitespace or cannot contain " +
 				"an underscore"));
-		}
-
-		if(id === "" || id === null) {
-			return Promise.reject(new InsightError("id cannot be empty or null"));
 		}
 
 		if(!datasetExists(id, this.datasets)) {
