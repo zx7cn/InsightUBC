@@ -6,6 +6,8 @@ import {
 	InsightResult,
 	NotFoundError
 } from "./IInsightFacade";
+import QueryValidator from "./QueryValidator";
+
 import {countRows, datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
 
@@ -82,7 +84,26 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public performQuery(query: unknown): Promise<InsightResult[]> {
-		return Promise.reject("Not implemented.");
+		// valid query must be JSON object literal; cast to object, reject on error
+		let queryObj: object;
+		try{
+			queryObj = query as object;
+		} catch (error) {
+			return Promise.reject(new InsightError("Query is not valid JSON object"));
+		}
+		let validator: QueryValidator = new QueryValidator(queryObj);
+		try {
+			// Check if query is valid against EBNF grammar
+			validator.validateEBNF();
+			// check if query has valid semantics
+			validator.validateSemantics();
+		} catch (insightError) {
+			return Promise.reject(insightError);
+		}
+		// retrieve data and build InsightResult[]
+		let queryResponse: InsightResult[] = validator.buildResponse();
+		// return data
+		return Promise.resolve(queryResponse);
 	}
 
 	public listDatasets(): Promise<InsightDataset[]> {
