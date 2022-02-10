@@ -88,9 +88,10 @@ describe("ValidateEBNF", function () {
 		try {
 			validator = new QueryValidator(simpleQuery);
 			validator.validateEBNF();
+			validator.validateSemantics(["courses"]);
 			expect(true).is.true;
 		} catch (e) {
-			expect.fail("InsightError expected");
+			expect.fail("InsightError not expected");
 			console.log(e);
 		}
 	});
@@ -101,7 +102,7 @@ describe("ValidateEBNF", function () {
 			validator.validateEBNF();
 			expect(true).is.true;
 		} catch (e) {
-			expect.fail("InsightError expected");
+			expect.fail("InsightError not expected");
 			console.log(e);
 		}
 	});

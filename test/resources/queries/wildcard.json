@@ -1,0 +1,113 @@
+{
+	"title": "SELECT dept, id, avg WHERE avg == 95 || avg > 90 && dept == 'adhe' ORDER BY avg",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"courses_avg": 92
+					}
+				},
+				{
+					"IS": {
+						"courses_dept": "*ch*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg"
+			],
+			"ORDER": "courses_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 92.18
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 92.18
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 92.43
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 92.43
+		},
+		{
+			"courses_dept": "chem",
+			"courses_avg": 92.5
+		},
+		{
+			"courses_dept": "chem",
+			"courses_avg": 92.5
+		},
+		{
+			"courses_dept": "chem",
+			"courses_avg": 92.57
+		},
+		{
+			"courses_dept": "chem",
+			"courses_avg": 92.57
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 92.59
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 92.59
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 92.75
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 93
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 93
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 93.5
+		},
+		{
+			"courses_dept": "mech",
+			"courses_avg": 93.5
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 94.75
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 94.75
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 95.31
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 95.31
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 95.54
+		},
+		{
+			"courses_dept": "chbe",
+			"courses_avg": 95.54
+		}
+	]
+}

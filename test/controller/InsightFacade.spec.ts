@@ -257,6 +257,8 @@ describe("InsightFacade", function () {
 		before(function () {
 			console.info(`Before: ${this.test?.parent?.title}`);
 
+			this.timeout(10000);
+
 			insightFacade = new InsightFacade();
 
 			// Load the datasets specified in datasetsToQuery and add them to InsightFacade.
@@ -288,6 +290,9 @@ describe("InsightFacade", function () {
 					} else {
 						expect(actual).to.be.instanceof(InsightError);
 					}
+				},
+				assertOnResult(actual, expected) {
+					expect(actual).to.have.deep.members(expected);
 				},
 			}
 		);

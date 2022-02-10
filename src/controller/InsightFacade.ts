@@ -10,17 +10,39 @@ import QueryValidator from "./QueryValidator";
 
 import {countRows, datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
+import {AST} from "./QueryValidatorInterfaces";
+import {buildResponse} from "./QueryResponse";
 
 /**
  * This is the main programmatic entry point for the project.
  * Method documentation is in IInsightFacade
  *
  */
+
+export interface CourseSection {
+	dept: string;
+	id: string;
+	avg: number;
+	instructor: string;
+	title: string;
+	pass: number;
+	fail: number;
+	audit: number;
+	uuid: string;
+	year: number;
+}
+
+// Do we need to store addedIds on disk so that addedIDs persists across instances of InsightFacade?
 export default class InsightFacade implements IInsightFacade {
 	private datasets: InsightDataset[];
+	private datasetIDs: string[];
+	private datasetObjects: Map<string, CourseSection[]>;
+
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasets = [];
+		this.datasetIDs = [];
+		this.datasetObjects = new Map<string, CourseSection[]>();
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -40,23 +62,29 @@ export default class InsightFacade implements IInsightFacade {
 		if(datasetExists(id, this.datasets)) {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
-		return unzipFile(content).then((parsedDataArray) => {
-			if(countRows(parsedDataArray) === 0) {
+		return unzipFile(content).then((parsedSections) => {
+			if(countRows(parsedSections) === 0) {
 				return Promise.reject(new InsightError("no valid section"));
 			}
+
+			this.datasetObjects.set(id, parsedSections);
 
 			let newDataset: InsightDataset = {
 				id: id,
 				kind: kind,
-				numRows: countRows(parsedDataArray)
+				numRows: countRows(parsedSections)
 			};
 			this.datasets.push(newDataset);
-			fs.writeFileSync("./data" + id + ".json", JSON.stringify(parsedDataArray));
-			let addedIds: string[] = [];
-			for(const i of this.datasets) {
-				addedIds.push(i.id);
+			if (!fs.pathExistsSync("./data/")) {
+				fs.mkdirsSync("./data/");
 			}
-			return Promise.resolve(addedIds);
+
+			let jsonOut: object[] = Array.from(parsedSections.entries()); // Need to fix this to generate objects
+			fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
+			// fs.writeFileSync("./data/" + id + ".json", JSON.stringify(parsedDataArray));
+			this.datasetIDs.push(id);
+
+			return Promise.resolve(this.datasetIDs);
 		});
 	}
 
@@ -92,16 +120,17 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new InsightError("Query is not valid JSON object"));
 		}
 		let validator: QueryValidator = new QueryValidator(queryObj);
+		let validAST: AST;
 		try {
-			// Check if query is valid against EBNF grammar
-			validator.validateEBNF();
-			// check if query has valid semantics
-			validator.validateSemantics();
+			// Check if query is valid against EBNF grammar and Builds AST
+			validAST = validator.validateEBNF();
+			// check if query AST has valid semantics and dataSet in query exists
+			validator.validateSemantics(this.datasetIDs);
 		} catch (insightError) {
 			return Promise.reject(insightError);
 		}
 		// retrieve data and build InsightResult[]
-		let queryResponse: InsightResult[] = validator.buildResponse();
+		let queryResponse: InsightResult[] = buildResponse(validAST, this.datasetObjects);
 		// return data
 		return Promise.resolve(queryResponse);
 	}

@@ -1,6 +1,7 @@
 import {InsightDataset, InsightError, InsightResult} from "./IInsightFacade";
 import * as fs from "fs-extra";
 import JSZip from "jszip";
+import {CourseSection} from "./InsightFacade";
 
 function datasetExists(id: string, dataset: InsightDataset[]): boolean {
 	for (const i of dataset) {
@@ -11,10 +12,12 @@ function datasetExists(id: string, dataset: InsightDataset[]): boolean {
 	return false;
 }
 
-function unzipFile(content: string): Promise<any> {
+function unzipFile(content: string): Promise<CourseSection[]> {
 	let zip = new JSZip();
 	let filesArray: any[] = [];
-	let parsedDataArray: any[] = [];
+	// let parsedDataArray: any[] = [];
+	let parsedSectionSet: CourseSection[] = [];
+
 	return zip.loadAsync(content, {base64: true}).then(function (data) {
 		zip.folder("courses")?.forEach(function (relativePath, file) {
 			filesArray.push(zip.file(file.name)?.async("string"));
@@ -23,7 +26,10 @@ function unzipFile(content: string): Promise<any> {
 			if (items.length > 0) {
 				items.forEach((course) => {
 					if (validJSONFile(course)) {
-						parsedDataArray.push(parseDataset(course));
+						if (Object.values(JSON.parse(course) as object)[0].length !== 0) {
+							// parsedDataArray.push(parseDataset(course));
+							parsedSectionSet = parsedSectionSet.concat(parseDataset(course));
+						}
 					} else {
 						return Promise.reject(new InsightError("not in JSON format"));
 					}
@@ -32,7 +38,9 @@ function unzipFile(content: string): Promise<any> {
 				return Promise.reject(new InsightError("empty zip"));
 			}
 		}).then(() => {
-			return Promise.resolve(parsedDataArray);
+			// return Promise.resolve(parsedDataArray);
+			return Promise.resolve(parsedSectionSet);
+
 		});
 	}).catch((e) => {
 		return Promise.reject(new InsightError("not a zip file"));
@@ -48,8 +56,9 @@ function validJSONFile(file: any): boolean {
 	}
 }
 
-function parseDataset(data: any): any {
-	let parsedDatasets: InsightResult[] = [];
+function parseDataset(data: any): CourseSection[] {
+	// let parsedDatasets: InsightResult[] = [];
+	let parsedCourses: CourseSection[] = [];
 	let course = JSON.parse(data);
 	for (let i of course.result) {
 		if (i.Subject !== undefined && i.Course !== undefined
@@ -62,27 +71,40 @@ function parseDataset(data: any): any {
 				i.Year = 1900;
 			}
 
-			let parsedData: InsightResult = {
+			// let parsedData: InsightResult = {
+			// 	dept: i.Subject, id: i.Course,
+			// 	avg: i.Avg, instructor: i.Professor,
+			// 	title: i.Title, pass: i.Pass,
+			// 	fail: i.Fail, audit: i.Audit,
+			// 	uuid: i.id.toString(), year: Number(i.Year)
+			// };
+			let courseData = {
 				dept: i.Subject, id: i.Course,
 				avg: i.Avg, instructor: i.Professor,
 				title: i.Title, pass: i.Pass,
 				fail: i.Fail, audit: i.Audit,
 				uuid: i.id.toString(), year: Number(i.Year)
 			};
-			parsedDatasets.push(parsedData);
+			// parsedDatasets.push(parsedData);
+			parsedCourses.push(courseData);
 		}
 	}
-	return parsedDatasets;
+	// return parsedDatasets;
+	return parsedCourses;
 }
 
-function countRows(array: any[]): number {
-	let numRows: number = 0;
-	let i: number = 0;
-	while(i < array.length) {
-		numRows = numRows + array[i].length;
-		i++;
-	}
-	return numRows;
+function countRows (sectionSet: CourseSection[]): number {
+	return sectionSet.length;
 }
+
+// function countRows(array: any[]): number {
+// 	let numRows: number = 0;
+// 	let i: number = 0;
+// 	while(i < array.length) {
+// 		numRows = numRows + array[i].length;
+// 		i++;
+// 	}
+// 	return numRows;
+// }
 
 export {datasetExists, parseDataset, validJSONFile, unzipFile, countRows};
