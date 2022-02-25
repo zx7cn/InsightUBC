@@ -2,7 +2,6 @@ import {InsightError, InsightResult, ResultTooLargeError} from "./IInsightFacade
 import {AST} from "./QueryValidatorInterfaces";
 import {CourseSection} from "./InsightFacade";
 
-// Refactor CourseSection[] into Set<CourseSection> to handle duplicates in OR better?
 function buildResponse(inputAST: AST, datasets: Map<string, CourseSection[]>): InsightResult[] {
 	// pull dataset of interest based on idstring in OPTIONS->COLUMNS
 	const columns: AST = inputAST.children[1].children[0];
@@ -80,7 +79,6 @@ function findMatchingSet(inputAST: AST, searchSet: CourseSection[], notFlag: boo
 			inputAST.children.forEach((value) => {
 				matchingSection = matchingSection.concat(findMatchingSet(value, searchSet, notFlag));
 			});
-			// Not ideal, but using for proof of concept - consider refactoring to use Sets instead of Arrays
 			matchingSection = Array.from(new Set(matchingSection));
 		}
 	} else if (inputAST.type === "MCOMP" || inputAST.type === "SCOMP") {

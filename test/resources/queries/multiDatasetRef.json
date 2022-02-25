@@ -17,7 +17,6 @@
     },
     "OPTIONS":{
       "COLUMNS":[
-        "secondSet_dept",
         "courses_avg"
       ],
       "ORDER":"courses_avg"

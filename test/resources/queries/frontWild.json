@@ -1,0 +1,28 @@
+{
+	"title": "SELECT dept, id, avg WHERE avg > 92 && dept == '*ch' ORDER BY avg",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"courses_avg": 92
+					}
+				},
+				{
+					"IS": {
+						"courses_dept": "*ch"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg"
+			],
+			"ORDER": "courses_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"mech","courses_avg":92.43},{"courses_dept":"mech","courses_avg":92.43},{"courses_dept":"mech","courses_avg":92.59},{"courses_dept":"mech","courses_avg":92.59},{"courses_dept":"mech","courses_avg":93},{"courses_dept":"mech","courses_avg":93},{"courses_dept":"mech","courses_avg":93.5},{"courses_dept":"mech","courses_avg":93.5}]
+}

@@ -1,11 +1,12 @@
-import {InsightError, InsightResult} from "./IInsightFacade";
+import {InsightError} from "./IInsightFacade";
 import {
-	ANDFilter, AST, Comparator, EQFilter, GTFilter, ISFilter, LTFilter, NOTFilter, ORFilter,
+	AST, Comparator, EQFilter, GTFilter, ISFilter, LTFilter, NOTFilter, ANDFilter, ORFilter,
 	QueryFilter, QueryObject, QueryOptions
 } from "./QueryValidatorInterfaces";
 
 /**
- * Helper class to validate incoming queries.  Handles EBNF and semantic checks.
+ * Class to validate incoming queries.  Handles EBNF and semantic checks.
+ * Produces AST representation of received Query
  */
 
 export default class QueryValidator {
@@ -25,22 +26,21 @@ export default class QueryValidator {
 		this.queryDataset = "";
 	}
 
-	// Check validEBNF of query object and build AST
+	/**
+	 * Checks query object for valid EBNF.  Returns AST representation of query
+	 */
 	public validateEBNF(): AST {
 		this.checkQUERY();
-
 		// Add WHERE and OPTIONS to AST
 		let whereAST = new AST("WHERE","");
 		let optionsAST = new AST("OPTIONS", "");
 		this.queryAST.children.push(whereAST);
 		this.queryAST.children.push(optionsAST);
-
 		// If WHERE:{} no need to check Filters
 		if (Object.keys(this.inputQuery["WHERE"]).length !== 0) {
 			this.checkFILTER(this.inputQuery["WHERE"], whereAST);
 		}
 		this.checkOPTIONS(this.inputQuery["OPTIONS"], optionsAST);
-
 		return this.queryAST;
 	}
 
@@ -63,24 +63,24 @@ export default class QueryValidator {
 			throw new InsightError("Invalid FILTER");
 		}
 		switch (Object.keys(queryFilter)[0]) {
-			case "AND": {
-				this.checkAND(queryFilter as ANDFilter, parent);
+			case "AND":{
+				this.checkLogic(queryFilter as ANDFilter, parent, "AND");
 				break;
 			}
 			case "OR": {
-				this.checkOR(queryFilter as ORFilter, parent);
+				this.checkLogic(queryFilter as ORFilter, parent, "OR");
 				break;
 			}
 			case "LT": {
-				this.checkLT(queryFilter as LTFilter, parent);
+				this.checkMComparator(queryFilter as LTFilter, parent, "LT");
 				break;
 			}
 			case "GT": {
-				this.checkGT(queryFilter as GTFilter, parent);
+				this.checkMComparator(queryFilter as GTFilter, parent, "GT");
 				break;
 			}
 			case "EQ": {
-				this.checkEQ(queryFilter as EQFilter, parent);
+				this.checkMComparator(queryFilter as EQFilter, parent, "EQ");
 				break;
 			}
 			case "IS": {
@@ -97,86 +97,40 @@ export default class QueryValidator {
 		}
 	}
 
-	private checkAND(andFilter: ANDFilter, parent: AST) {
-		// check AND is Array of non-zero length
-		if (!(andFilter["AND"] instanceof Array)
-			|| Object.keys(andFilter["AND"]).length < 1) {
-			throw new InsightError("AND keys must be contained in non-zero Array");
+	private checkLogic(andOrFilter: ANDFilter | ORFilter, parent: AST, key: keyof ANDFilter | keyof ORFilter) {
+		// check AND/OR is Array of non-zero length
+		if (!(andOrFilter[key] instanceof Array)
+			|| Object.keys(andOrFilter[key] as QueryFilter[]).length < 1) {
+			throw new InsightError(key + " keys must be contained in non-zero Array");
 		}
-
-		// Add AND to AST
-		let andAST = new AST("LOGIC", "AND");
-		parent.children.push(andAST);
-
-		// iterate through each AND key
-		for (const x in andFilter["AND"]) {
-			let newFilter = andFilter["AND"][x];
-			this.checkFILTER(newFilter, andAST);
-		}
-	}
-
-	private checkOR(orFilter: ORFilter, parent: AST) {
-		// check OR is Array of non-zero length
-		if (!(orFilter["OR"] instanceof Array)
-			|| Object.keys(orFilter["OR"]).length < 1) {
-			throw new InsightError("OR keys must be contained in non-zero Array");
-		}
-
-		// add OR to AST
-		let orAST = new AST("LOGIC", "OR");
-		parent.children.push(orAST);
-
-		// iterate through each OR key
-		for (const x in orFilter["OR"]) {
-			let newFilter = orFilter["OR"][x];
-			this.checkFILTER(newFilter, orAST);
+		// Add AND/OR to AST
+		let andOrAST = new AST("LOGIC", key);
+		parent.children.push(andOrAST);
+		// iterate through each AND/Or key
+		let filter: QueryFilter[] = andOrFilter[key] as QueryFilter[];
+		for (const x in filter) {
+			let newFilter = filter[x];
+			this.checkFILTER(newFilter, andOrAST);
 		}
 	}
 
-	private checkLT(ltFilter: LTFilter, parent: AST) {
-		// add LT to AST
-		let ltAST = new AST("MCOMP", "LT");
-		parent.children.push(ltAST);
+	private checkMComparator(mFilter: LTFilter | GTFilter | EQFilter, parent: AST,
+		key: keyof LTFilter | keyof GTFilter | keyof EQFilter) {
 
-		// check if LT has mKey and value
-		let comparator: Comparator = ltFilter["LT"];
-		this.checkMComparator(comparator, ltAST);
-	}
-
-	private checkGT(gtFilter: GTFilter, parent: AST) {
-		// add GT to AST
-		let gtAST = new AST("MCOMP", "GT");
-		parent.children.push(gtAST);
-
-		// check if GT has mKey and value
-		let comparator: Comparator = gtFilter["GT"];
-		this.checkMComparator(comparator, gtAST);
-	}
-
-	private checkEQ(eqFilter: EQFilter, parent: AST) {
-		// add EQ to AST
-		let eqAST = new AST("MCOMP", "EQ");
-		parent.children.push(eqAST);
-
-		// check if EQ has mKey and value
-		const comparator: Comparator = eqFilter["EQ"];
-		this.checkMComparator(comparator, eqAST);
-	}
-
-	// checks MCOMPARATOR for valid mKey and value
-	private checkMComparator(mComparator: Comparator, parent: AST) {
+		let mCompAST = new AST("MCOMP", key);
+		parent.children.push(mCompAST);
+		const mComparator: Comparator = mFilter[key] as Comparator;
 		if (Object.keys(mComparator).length !== 1) {
-			throw new InsightError("Invalid MCOMPARISON FILTER");
+			throw new InsightError("Invalid" + key + "FILTER");
 		} else if (!(this.regexMKey.test(Object.keys(mComparator)[0]))
 			|| (typeof Object.values(mComparator)[0] !== "number")) {
-			throw new InsightError("MCOMPARISON FILTER requires numerical field and numeric value");
+			throw new InsightError(key + " FILTER requires numerical field and numeric value");
 		}
-
 		// add MCOMP key/value to AST
 		let mkeyAST = new AST("MKEY", Object.keys(mComparator)[0]);
-		parent.children.push(mkeyAST);
+		mCompAST.children.push(mkeyAST);
 		let mvalAST = new AST("MVAL", Object.values(mComparator)[0]);
-		parent.children.push(mvalAST);
+		mCompAST.children.push(mvalAST);
 	}
 
 	private checkIS(isFilter: ISFilter, parent: AST) {
@@ -189,7 +143,6 @@ export default class QueryValidator {
 			|| !(this.regexSInput.test(Object.values(comparator)[0] as string))) {
 			throw new InsightError("IS FILTER requires alphanumeric field and string value of form *input*");
 		}
-
 		// add IS to AST
 		let isAST = new AST("SCOMP", "IS");
 		parent.children.push(isAST);
@@ -197,8 +150,9 @@ export default class QueryValidator {
 		let skeyAST = new AST("SKEY", Object.keys(comparator)[0]);
 		isAST.children.push(skeyAST);
 		if (Object.values(comparator)[0] as string ) {
-			// REGEXP Check for *
-			let matchString: string = (Object.values(comparator)[0] as string).replaceAll("*",".*");
+			// REGEXP Check for * - add start ^ and end $ to force whole string match
+			let matchString: string = "^" + (Object.values(comparator)[0] as string) + "$";
+			matchString = matchString.replaceAll("*", ".*");
 			let svalAST = new AST("SVAL", new RegExp(matchString));
 			isAST.children.push(svalAST);
 		}
@@ -208,7 +162,6 @@ export default class QueryValidator {
 		// add NOT to AST
 		let notAST = new AST("NEG", "NOT");
 		parent.children.push(notAST);
-
 		this.checkFILTER(notFilter["NOT"], notAST);
 	}
 
@@ -224,11 +177,9 @@ export default class QueryValidator {
 		if (!(queryOptions["COLUMNS"] instanceof Array)) {
 			throw new InsightError("COLUMNS keys must be contained in an Array");
 		}
-
 		// add COLUMNS to AST
 		let colAST = new AST("COLUMNS", "");
 		parent.children.push(colAST);
-
 		// check at least one column key, and column keys of type string with correct format
 		let queryColumns: string[] = queryOptions["COLUMNS"];
 		if (queryColumns.length === 0) {
@@ -246,13 +197,11 @@ export default class QueryValidator {
 				colAST.children.push(colkeyAST);
 			}
 		}
-
 		// Check ORDER key is string with correct format (if applicable)
 		if (Object.keys(queryOptions).includes("ORDER")) {
 			if (!this.regexColumnKey.test(queryOptions["ORDER"])) {
 				throw new InsightError("ORDER key must be of type: 'idstring_field'");
 			}
-
 			// add ORDER to AST
 			let orderAST = new AST("ORDER", "");
 			parent.children.push(orderAST);
@@ -284,7 +233,6 @@ export default class QueryValidator {
 			}
 			astNode.children.forEach((value) => todo.unshift(value));
 		}
-
 		// check if dataset exists
 		if (!datasets.includes(this.queryDataset)) {
 			throw new InsightError("dataset " + this.queryDataset + " does not exist");

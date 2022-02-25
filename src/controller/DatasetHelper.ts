@@ -16,34 +16,38 @@ function unzipFile(content: string): Promise<CourseSection[]> {
 	let zip = new JSZip();
 	let filesArray: any[] = [];
 	// let parsedDataArray: any[] = [];
-	let parsedSectionSet: CourseSection[] = [];
 
 	return zip.loadAsync(content, {base64: true}).then(function (data) {
 		zip.folder("courses")?.forEach(function (relativePath, file) {
 			filesArray.push(zip.file(file.name)?.async("string"));
 		});
-		return Promise.all(filesArray).then((items: string[]) => {
-			if (items.length > 0) {
-				items.forEach((course) => {
-					if (validJSONFile(course)) {
-						if (Object.values(JSON.parse(course) as object)[0].length !== 0) {
-							// parsedDataArray.push(parseDataset(course));
-							parsedSectionSet = parsedSectionSet.concat(parseDataset(course));
-						}
-					} else {
-						return Promise.reject(new InsightError("not in JSON format"));
-					}
-				});
-			} else {
-				return Promise.reject(new InsightError("empty zip"));
-			}
-		}).then(() => {
-			// return Promise.resolve(parsedDataArray);
-			return Promise.resolve(parsedSectionSet);
-
-		});
+		return parseCourses(filesArray);
 	}).catch((e) => {
 		return Promise.reject(new InsightError("not a zip file"));
+	});
+}
+
+function parseCourses(filesArray: any[]): Promise<CourseSection[]> {
+	let parsedSectionSet: CourseSection[] = [];
+	return Promise.all(filesArray).then((items: string[]) => {
+		if (items.length > 0) {
+			items.forEach((course) => {
+				if (validJSONFile(course)) {
+					if (Object.values(JSON.parse(course) as object)[0].length !== 0) {
+						// parsedDataArray.push(parseDataset(course));
+						parsedSectionSet = parsedSectionSet.concat(parseDataset(course));
+					}
+				} else {
+					return Promise.reject(new InsightError("not in JSON format"));
+				}
+			});
+		} else {
+			return Promise.reject(new InsightError("empty zip"));
+		}
+	}).then(() => {
+		// return Promise.resolve(parsedDataArray);
+		return Promise.resolve(parsedSectionSet);
+
 	});
 }
 
