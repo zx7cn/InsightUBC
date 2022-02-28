@@ -1,0 +1,44 @@
+{
+	"title": "Select cpsc 110 courses not taught by Gregor or Joanna",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"OR": [
+							{
+								"IS": {
+									"courses_instructor": "kiczales, gregor"
+								}
+							},
+							{
+								"IS": {
+									"courses_instructor": "mcgrenere, joanna"
+								}
+							}
+						]
+					}
+				},
+				{
+					"IS": {
+						"courses_dept": "cpsc"
+					}
+				},
+				{
+					"IS": {
+						"courses_id": "110"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_id",
+				"courses_instructor"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"garcia, ronald"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"aiello, william"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"garcia, ronald"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"little, james joseph"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"garcia, ronald"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"greif, chen"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"little, james joseph"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"greif, chen"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"wolfman, steven"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"berg, celina"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"aiello, william"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"little, james joseph"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"berg, celina"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"eiselt, kurt"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"eiselt, kurt"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"eiselt, kurt"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"garcia, ronald"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"little, james joseph"},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":""}]
+}

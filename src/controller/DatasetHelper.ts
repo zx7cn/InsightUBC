@@ -1,7 +1,5 @@
 import {InsightDataset, InsightError, InsightResult} from "./IInsightFacade";
-import * as fs from "fs-extra";
 import JSZip from "jszip";
-import {CourseSection} from "./InsightFacade";
 
 function datasetExists(id: string, dataset: InsightDataset[]): boolean {
 	for (const i of dataset) {
@@ -12,7 +10,7 @@ function datasetExists(id: string, dataset: InsightDataset[]): boolean {
 	return false;
 }
 
-function unzipFile(content: string): Promise<CourseSection[]> {
+function unzipFile(content: string): Promise<InsightResult[]> {
 	let zip = new JSZip();
 	let filesArray: any[] = [];
 	// let parsedDataArray: any[] = [];
@@ -27,8 +25,8 @@ function unzipFile(content: string): Promise<CourseSection[]> {
 	});
 }
 
-function parseCourses(filesArray: any[]): Promise<CourseSection[]> {
-	let parsedSectionSet: CourseSection[] = [];
+function parseCourses(filesArray: any[]): Promise<InsightResult[]> {
+	let parsedSectionSet: InsightResult[] = [];
 	return Promise.all(filesArray).then((items: string[]) => {
 		if (items.length > 0) {
 			items.forEach((course) => {
@@ -60,9 +58,8 @@ function validJSONFile(file: any): boolean {
 	}
 }
 
-function parseDataset(data: any): CourseSection[] {
-	// let parsedDatasets: InsightResult[] = [];
-	let parsedCourses: CourseSection[] = [];
+function parseDataset(data: any): InsightResult[] {
+	let parsedDatasets: InsightResult[] = [];
 	let course = JSON.parse(data);
 	for (let i of course.result) {
 		if (i.Subject !== undefined && i.Course !== undefined
@@ -75,40 +72,21 @@ function parseDataset(data: any): CourseSection[] {
 				i.Year = 1900;
 			}
 
-			// let parsedData: InsightResult = {
-			// 	dept: i.Subject, id: i.Course,
-			// 	avg: i.Avg, instructor: i.Professor,
-			// 	title: i.Title, pass: i.Pass,
-			// 	fail: i.Fail, audit: i.Audit,
-			// 	uuid: i.id.toString(), year: Number(i.Year)
-			// };
-			let courseData = {
+			let parsedData: InsightResult = {
 				dept: i.Subject, id: i.Course,
 				avg: i.Avg, instructor: i.Professor,
 				title: i.Title, pass: i.Pass,
 				fail: i.Fail, audit: i.Audit,
 				uuid: i.id.toString(), year: Number(i.Year)
 			};
-			// parsedDatasets.push(parsedData);
-			parsedCourses.push(courseData);
+			parsedDatasets.push(parsedData);
 		}
 	}
-	// return parsedDatasets;
-	return parsedCourses;
+	return parsedDatasets;
 }
 
-function countRows (sectionSet: CourseSection[]): number {
+function countRows (sectionSet: InsightResult[]): number {
 	return sectionSet.length;
 }
-
-// function countRows(array: any[]): number {
-// 	let numRows: number = 0;
-// 	let i: number = 0;
-// 	while(i < array.length) {
-// 		numRows = numRows + array[i].length;
-// 		i++;
-// 	}
-// 	return numRows;
-// }
 
 export {datasetExists, parseDataset, validJSONFile, unzipFile, countRows};

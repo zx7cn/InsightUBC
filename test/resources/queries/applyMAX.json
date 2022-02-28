@@ -1,0 +1,32 @@
+{
+	"title": "Applying MAX transformation returns correct max results",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"maxAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"maxAvg": {
+						"MAX": "courses_avg"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","maxAvg":88},{"courses_id":"102","courses_title":"basic russian ii","maxAvg":90.5},{"courses_id":"200","courses_title":"2nd year russian","maxAvg":83.83},{"courses_id":"206","courses_title":"19th c russ writ","maxAvg":82.1},{"courses_id":"207","courses_title":"20th c russ writ","maxAvg":84.83},{"courses_id":"300","courses_title":"third-year russ","maxAvg":92.3},{"courses_id":"316","courses_title":"russ throug film","maxAvg":88.45},{"courses_id":"400","courses_title":"fourth-year russ","maxAvg":89.54},{"courses_id":"412","courses_title":"dostoevsky trnsl","maxAvg":82.18}]
+}

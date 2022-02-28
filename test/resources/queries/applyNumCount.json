@@ -1,0 +1,32 @@
+{
+	"title": "Applying COUNT transformation to numeric field returns correct COUNT results",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"numYears"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"numYears": {
+						"COUNT": "courses_year"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","numYears":5},{"courses_id":"102","courses_title":"basic russian ii","numYears":5},{"courses_id":"200","courses_title":"2nd year russian","numYears":9},{"courses_id":"206","courses_title":"19th c russ writ","numYears":9},{"courses_id":"207","courses_title":"20th c russ writ","numYears":9},{"courses_id":"300","courses_title":"third-year russ","numYears":9},{"courses_id":"316","courses_title":"russ throug film","numYears":3},{"courses_id":"400","courses_title":"fourth-year russ","numYears":8},{"courses_id":"412","courses_title":"dostoevsky trnsl","numYears":4}]
+}

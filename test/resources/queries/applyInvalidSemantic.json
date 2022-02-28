@@ -1,0 +1,32 @@
+{
+	"title": "Applying AVG transformation on textual data throws InsightError",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"overallAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"overallAvg": {
+						"AVG": "courses_instructor"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -1,0 +1,45 @@
+{
+	"title": "Sort ascending all grouped cpsc 110 and 121 courses by id, MaxAvg then instructor",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"IS": {
+						"courses_dept": "cpsc"
+					}
+				},
+				{
+					"OR": [
+						{
+							"IS": {
+								"courses_id": "110"
+							}
+						},
+						{
+							"IS": {
+								"courses_id": "121"
+							}
+						}
+					]
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": ["courses_dept", "courses_id", "courses_instructor", "MaxAvg"],
+			"ORDER": {
+				"keys": ["courses_id", "MaxAvg", "courses_instructor"],
+				"dir": "UP"
+			}
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["courses_dept", "courses_id", "courses_instructor"],
+			"APPLY": [{
+				"MaxAvg": {
+					"MAX": "courses_avg"
+				}
+			}]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"aiello, william","MaxAvg":71.14},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"little, james joseph","MaxAvg":73.83},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"wolfman, steven","MaxAvg":74.79},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"berg, celina","MaxAvg":75.06},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"allen, meghan","MaxAvg":75.89},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"","MaxAvg":78.7},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"mcgrenere, joanna","MaxAvg":82.32},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"eiselt, kurt","MaxAvg":82.43},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"garcia, ronald","MaxAvg":82.44},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"carter, paul martin","MaxAvg":83.43},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"kiczales, gregor","MaxAvg":85.11},{"courses_dept":"cpsc","courses_id":"110","courses_instructor":"greif, chen","MaxAvg":85.46},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"gao, xi","MaxAvg":72.03},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"cooper, kendra","MaxAvg":74.15},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"woodham, robert","MaxAvg":75.5},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"tompkins, david a d","MaxAvg":76.46},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"voll, kimberly","MaxAvg":76.58},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"allen, meghan","MaxAvg":77.21},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"dulat, margaret","MaxAvg":79.41},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"wolfman, steven","MaxAvg":80.2},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"tsiknis, georgios","MaxAvg":82.63},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"belleville, patrice","MaxAvg":83.41},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"","MaxAvg":84.56},{"courses_dept":"cpsc","courses_id":"121","courses_instructor":"eiselt, kurt","MaxAvg":84.56}]
+}

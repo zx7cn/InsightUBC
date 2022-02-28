@@ -1,0 +1,32 @@
+{
+	"title": "Applying AVG transformation returns correct Average results",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"overallAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"overallAvg": {
+						"AVG": "courses_avg"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","overallAvg":83.07},{"courses_id":"102","courses_title":"basic russian ii","overallAvg":84.28},{"courses_id":"200","courses_title":"2nd year russian","overallAvg":75.93},{"courses_id":"206","courses_title":"19th c russ writ","overallAvg":79.83},{"courses_id":"207","courses_title":"20th c russ writ","overallAvg":80.01},{"courses_id":"300","courses_title":"third-year russ","overallAvg":83.6},{"courses_id":"316","courses_title":"russ throug film","overallAvg":87.61},{"courses_id":"400","courses_title":"fourth-year russ","overallAvg":84.36},{"courses_id":"412","courses_title":"dostoevsky trnsl","overallAvg":80.34}]
+}

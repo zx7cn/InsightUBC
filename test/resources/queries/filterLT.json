@@ -1,0 +1,30 @@
+{
+	"title": "Select courses with < 1 passing or avg !< 98.5",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"LT": {
+						"courses_pass": 1
+					}
+				},
+				{
+					"NOT": {
+						"LT": {
+							"courses_avg": 98.5
+						}
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg",
+				"courses_pass"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"busi","courses_avg":4,"courses_pass":0},{"courses_dept":"busi","courses_avg":4,"courses_pass":0},{"courses_dept":"cnps","courses_avg":99.19,"courses_pass":16},{"courses_dept":"eece","courses_avg":98.75,"courses_pass":12},{"courses_dept":"eece","courses_avg":98.75,"courses_pass":12},{"courses_dept":"epse","courses_avg":98.7,"courses_pass":10},{"courses_dept":"epse","courses_avg":98.8,"courses_pass":25},{"courses_dept":"epse","courses_avg":98.58,"courses_pass":24},{"courses_dept":"epse","courses_avg":98.58,"courses_pass":24},{"courses_dept":"epse","courses_avg":98.76,"courses_pass":17},{"courses_dept":"epse","courses_avg":98.76,"courses_pass":17},{"courses_dept":"fopr","courses_avg":4.5,"courses_pass":0},{"courses_dept":"frst","courses_avg":0,"courses_pass":0},{"courses_dept":"lfs","courses_avg":0,"courses_pass":0},{"courses_dept":"lfs","courses_avg":0,"courses_pass":0},{"courses_dept":"math","courses_avg":99.78,"courses_pass":9},{"courses_dept":"math","courses_avg":99.78,"courses_pass":9},{"courses_dept":"nurs","courses_avg":98.71,"courses_pass":14},{"courses_dept":"nurs","courses_avg":98.71,"courses_pass":14},{"courses_dept":"nurs","courses_avg":98.5,"courses_pass":16},{"courses_dept":"nurs","courses_avg":98.5,"courses_pass":16},{"courses_dept":"nurs","courses_avg":98.58,"courses_pass":12},{"courses_dept":"nurs","courses_avg":98.58,"courses_pass":12},{"courses_dept":"spph","courses_avg":98.98,"courses_pass":82},{"courses_dept":"spph","courses_avg":98.98,"courses_pass":82},{"courses_dept":"wood","courses_avg":1,"courses_pass":0}]
+}

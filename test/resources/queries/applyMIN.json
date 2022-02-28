@@ -1,0 +1,32 @@
+{
+	"title": "Applying MIN transformation returns correct min results",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"minAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"minAvg": {
+						"MIN": "courses_avg"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","minAvg":76.63},{"courses_id":"102","courses_title":"basic russian ii","minAvg":79.33},{"courses_id":"200","courses_title":"2nd year russian","minAvg":64.13},{"courses_id":"206","courses_title":"19th c russ writ","minAvg":76.45},{"courses_id":"207","courses_title":"20th c russ writ","minAvg":76.93},{"courses_id":"300","courses_title":"third-year russ","minAvg":77.96},{"courses_id":"316","courses_title":"russ throug film","minAvg":86.78},{"courses_id":"400","courses_title":"fourth-year russ","minAvg":78.59},{"courses_id":"412","courses_title":"dostoevsky trnsl","minAvg":77.79}]
+}

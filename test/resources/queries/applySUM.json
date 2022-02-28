@@ -1,0 +1,32 @@
+{
+	"title": "Applying SUM transformation returns correct Sum results",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"numFailed"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"numFailed": {
+						"SUM": "courses_fail"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","numFailed":12},{"courses_id":"102","courses_title":"basic russian ii","numFailed":0},{"courses_id":"200","courses_title":"2nd year russian","numFailed":8},{"courses_id":"206","courses_title":"19th c russ writ","numFailed":8},{"courses_id":"207","courses_title":"20th c russ writ","numFailed":14},{"courses_id":"300","courses_title":"third-year russ","numFailed":0},{"courses_id":"316","courses_title":"russ throug film","numFailed":0},{"courses_id":"400","courses_title":"fourth-year russ","numFailed":0},{"courses_id":"412","courses_title":"dostoevsky trnsl","numFailed":4}]
+}

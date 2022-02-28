@@ -1,0 +1,26 @@
+{
+	"title": "sorting with array of keys and no direction throws InsightError",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "cpsc"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["courses_dept", "courses_id", "MaxAvg"],
+			"ORDER": {
+				"keys": ["courses_instructor", "MaxAvg"]
+			}
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["courses_dept", "courses_id"],
+			"APPLY": [{
+				"MaxAvg": {
+					"MAX": "courses_avg"
+				}
+			}]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

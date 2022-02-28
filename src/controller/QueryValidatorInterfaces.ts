@@ -5,6 +5,7 @@
 export interface QueryObject {
 	WHERE: QueryFilter;
 	OPTIONS: QueryOptions;
+	TRANSFORMATIONS?: QueryTransform;
 }
 
 export interface QueryFilter {
@@ -17,79 +18,35 @@ export interface QueryFilter {
 	NOT?: QueryFilter;
 }
 
-export interface ANDFilter extends QueryFilter{
-	AND: QueryFilter[];
-	OR?: never;
-	LT?: never;
-	GT?: never;
-	EQ?: never;
-	IS?: never;
-	NOT?: never;
-}
-
-export interface ORFilter extends QueryFilter {
-	AND?: never;
-	OR: QueryFilter[];
-	LT?: never;
-	GT?: never;
-	EQ?: never;
-	IS?: never;
-	NOT?: never;
-}
-
-export interface LTFilter extends QueryFilter {
-	And?: never;
-	OR?: never;
-	LT: Comparator;
-	GT?: never;
-	EQ?: never;
-	IS?: never;
-	NOT?: never;
-}
-export interface GTFilter extends QueryFilter {
-	And?: never;
-	OR?: never;
-	LT?: never;
-	GT: Comparator;
-	EQ?: never;
-	IS?: never;
-	NOT?: never;
-}
-export interface EQFilter extends QueryFilter {
-	And?: never;
-	OR?: never;
-	LT?: never;
-	GT?: never;
-	EQ: Comparator;
-	IS?: never;
-	NOT?: never;
-}
-export interface ISFilter extends QueryFilter {
-	And?: never;
-	OR?: never;
-	LT?: never;
-	GT?: never;
-	EQ?: never;
-	IS: Comparator;
-	NOT?: never;
-}
-export interface NOTFilter extends QueryFilter {
-	And?: never;
-	OR?: never;
-	LT?: never;
-	GT?: never;
-	EQ?: never;
-	IS?: never;
-	NOT: QueryFilter;
+export interface Comparator {
+	KEY: string | number;
 }
 
 export interface QueryOptions {
 	COLUMNS: string[];
-	ORDER: string;
+	ORDER?: QuerySort | string;
 }
 
-export interface Comparator {
-	KEY: string | number;
+export interface QuerySort {
+	dir: "UP" | "DOWN";
+	keys: string[];
+}
+
+export interface QueryTransform {
+	GROUP: string[];
+	APPLY: ApplyRule[];
+}
+
+export interface ApplyRule {
+	applykey: ApplyToken;
+}
+
+export interface ApplyToken {
+	MAX?: string;
+	MIN?: string;
+	AVG?: string;
+	COUNT?: string;
+	SUM?: string;
 }
 
 export class AST {

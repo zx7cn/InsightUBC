@@ -1,0 +1,37 @@
+{
+	"title": "Applying duplicate transformation keys throws InsightError",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"overallAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"overallAvg": {
+						"AVG": "courses_avg"
+					}
+				},
+				{
+					"overallAvg": {
+						"AVG": "courses_pass"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

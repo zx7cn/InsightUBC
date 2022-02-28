@@ -1,0 +1,17 @@
+{
+	"title": "Filter courses with invalid comparator throws InsightError",
+	"input": {
+		"WHERE": {
+			"CONTAINS": {
+				"courses_id": "3*"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

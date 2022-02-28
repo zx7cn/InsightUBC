@@ -1,0 +1,28 @@
+{
+	"title": "SELECT dept, id, avg WHERE avg > 92 && dept == '*ch*' ORDER BY avg",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"courses_avg": 92
+					}
+				},
+				{
+					"IS": {
+						"courses_dept": "**h*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg"
+			],
+			"ORDER": "courses_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

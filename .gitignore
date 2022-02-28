@@ -17,3 +17,6 @@ data/
 .DS_Store
 .env
 *.log
+
+# Jetbrains test coverage
+.nyc_output/

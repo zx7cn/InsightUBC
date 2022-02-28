@@ -1,0 +1,56 @@
+{
+	"title": "Applying multiple transformations returns correct result",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "russ"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_id",
+				"courses_title",
+				"MaxAvg",
+				"overallAvg",
+				"MinAvg",
+				"TotalSections",
+				"NumFailed"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_id",
+				"courses_title"
+			],
+			"APPLY": [
+				{
+					"MaxAvg": {
+						"MAX": "courses_avg"
+					}
+				},
+				{
+					"overallAvg": {
+						"AVG": "courses_avg"
+					}
+				},
+				{
+					"MinAvg": {
+						"MIN": "courses_avg"
+					}
+				},
+				{
+					"TotalSections": {
+						"COUNT": "courses_avg"
+					}
+				},
+				{
+					"NumFailed": {
+						"SUM": "courses_fail"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_id":"101","courses_title":"basic russian i","MaxAvg":88,"overallAvg":83.07,"MinAvg":76.63,"TotalSections":16,"NumFailed":12},{"courses_id":"102","courses_title":"basic russian ii","MaxAvg":90.5,"overallAvg":84.28,"MinAvg":79.33,"TotalSections":15,"NumFailed":0},{"courses_id":"200","courses_title":"2nd year russian","MaxAvg":83.83,"overallAvg":75.93,"MinAvg":64.13,"TotalSections":14,"NumFailed":8},{"courses_id":"206","courses_title":"19th c russ writ","MaxAvg":82.1,"overallAvg":79.83,"MinAvg":76.45,"TotalSections":8,"NumFailed":8},{"courses_id":"207","courses_title":"20th c russ writ","MaxAvg":84.83,"overallAvg":80.01,"MinAvg":76.93,"TotalSections":9,"NumFailed":14},{"courses_id":"300","courses_title":"third-year russ","MaxAvg":92.3,"overallAvg":83.6,"MinAvg":77.96,"TotalSections":8,"NumFailed":0},{"courses_id":"316","courses_title":"russ throug film","MaxAvg":88.45,"overallAvg":87.61,"MinAvg":86.78,"TotalSections":2,"NumFailed":0},{"courses_id":"400","courses_title":"fourth-year russ","MaxAvg":89.54,"overallAvg":84.36,"MinAvg":78.59,"TotalSections":8,"NumFailed":0},{"courses_id":"412","courses_title":"dostoevsky trnsl","MaxAvg":82.18,"overallAvg":80.34,"MinAvg":77.79,"TotalSections":3,"NumFailed":4}]
+}

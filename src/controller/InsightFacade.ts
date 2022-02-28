@@ -18,31 +18,17 @@ import {buildResponse} from "./QueryResponse";
  * Method documentation is in IInsightFacade
  *
  */
-
-export interface CourseSection {
-	dept: string;
-	id: string;
-	avg: number;
-	instructor: string;
-	title: string;
-	pass: number;
-	fail: number;
-	audit: number;
-	uuid: string;
-	year: number;
-}
-
 // Do we need to store addedIds on disk so that addedIDs persists across instances of InsightFacade?
 export default class InsightFacade implements IInsightFacade {
 	private datasets: InsightDataset[];
 	private datasetIDs: string[];
-	private datasetObjects: Map<string, CourseSection[]>;
+	private datasetObjects: Map<string, InsightResult[]>;
 
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasets = [];
 		this.datasetIDs = [];
-		this.datasetObjects = new Map<string, CourseSection[]>();
+		this.datasetObjects = new Map<string, InsightResult[]>();
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -121,16 +107,17 @@ export default class InsightFacade implements IInsightFacade {
 		}
 		let validator: QueryValidator = new QueryValidator(queryObj);
 		let validAST: AST;
+		let queryDataset: string;
 		try {
 			// Check if query is valid against EBNF grammar and Builds AST
 			validAST = validator.validateEBNF();
 			// check if query AST has valid semantics and dataSet in query exists
-			validator.validateSemantics(this.datasetIDs);
+			queryDataset = validator.validateSemantics(this.datasetIDs);
 		} catch (insightError) {
 			return Promise.reject(insightError);
 		}
 		// retrieve data and build InsightResult[]
-		let queryResponse: InsightResult[] = buildResponse(validAST, this.datasetObjects);
+		let queryResponse: InsightResult[] = buildResponse(validAST, queryDataset, this.datasetObjects);
 		// return data
 		return Promise.resolve(queryResponse);
 	}

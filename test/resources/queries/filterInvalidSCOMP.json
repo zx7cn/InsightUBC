@@ -1,0 +1,17 @@
+{
+	"title": "Filter courses with number field instead of string throws InsightError",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_id": 310
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

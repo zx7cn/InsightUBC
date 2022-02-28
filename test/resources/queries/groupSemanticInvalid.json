@@ -1,0 +1,23 @@
+{
+	"title": "Selecting Column not contained in Grouping or APPLY throws InsightError",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"courses_dept": "cpsc"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["courses_dept", "courses_id", "MaxAvg"]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["courses_dept"],
+			"APPLY": [{
+				"MaxAvg": {
+					"MAX": "courses_avg"
+				}
+			}]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

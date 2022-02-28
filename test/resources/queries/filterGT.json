@@ -1,0 +1,30 @@
+{
+	"title": "Select courses with AVG > 95 auditors and num pass !> 5",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"courses_avg": 95
+					}
+				},
+				{
+					"NOT": {
+						"GT": {
+							"courses_pass": 5
+						}
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg",
+				"courses_pass"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"crwr","courses_avg":96,"courses_pass":1},{"courses_dept":"crwr","courses_avg":97,"courses_pass":1},{"courses_dept":"crwr","courses_avg":96,"courses_pass":1},{"courses_dept":"crwr","courses_avg":98,"courses_pass":1},{"courses_dept":"crwr","courses_avg":96,"courses_pass":1},{"courses_dept":"crwr","courses_avg":98,"courses_pass":1},{"courses_dept":"crwr","courses_avg":96,"courses_pass":2},{"courses_dept":"crwr","courses_avg":96,"courses_pass":1},{"courses_dept":"kin","courses_avg":96,"courses_pass":4},{"courses_dept":"math","courses_avg":95.67,"courses_pass":3},{"courses_dept":"math","courses_avg":95.67,"courses_pass":3},{"courses_dept":"math","courses_avg":96.25,"courses_pass":4},{"courses_dept":"math","courses_avg":96.25,"courses_pass":4},{"courses_dept":"math","courses_avg":97.25,"courses_pass":4},{"courses_dept":"math","courses_avg":97.25,"courses_pass":4},{"courses_dept":"math","courses_avg":96.33,"courses_pass":3},{"courses_dept":"mine","courses_avg":95.6,"courses_pass":5},{"courses_dept":"mtrl","courses_avg":96.25,"courses_pass":4},{"courses_dept":"mtrl","courses_avg":96.25,"courses_pass":4},{"courses_dept":"musc","courses_avg":96.5,"courses_pass":4},{"courses_dept":"musc","courses_avg":96.5,"courses_pass":4},{"courses_dept":"pcth","courses_avg":96,"courses_pass":1},{"courses_dept":"phil","courses_avg":96,"courses_pass":1},{"courses_dept":"psyc","courses_avg":96,"courses_pass":4},{"courses_dept":"psyc","courses_avg":96,"courses_pass":4},{"courses_dept":"psyc","courses_avg":95.75,"courses_pass":4},{"courses_dept":"psyc","courses_avg":95.75,"courses_pass":4},{"courses_dept":"psyc","courses_avg":95.25,"courses_pass":4},{"courses_dept":"psyc","courses_avg":95.25,"courses_pass":4},{"courses_dept":"psyc","courses_avg":97,"courses_pass":1},{"courses_dept":"psyc","courses_avg":96,"courses_pass":1},{"courses_dept":"spph","courses_avg":96.8,"courses_pass":5},{"courses_dept":"spph","courses_avg":96.8,"courses_pass":5},{"courses_dept":"spph","courses_avg":95.75,"courses_pass":4},{"courses_dept":"spph","courses_avg":95.75,"courses_pass":4}]
+}

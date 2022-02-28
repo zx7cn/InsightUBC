@@ -1,0 +1,30 @@
+{
+	"title": "Select courses with 7 auditors and fail != 0",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"EQ": {
+						"courses_audit": 7
+					}
+				},
+				{
+					"NOT": {
+						"EQ": {
+							"courses_fail": 0
+						}
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg",
+				"courses_fail"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"courses_dept":"biol","courses_avg":69.54,"courses_fail":86},{"courses_dept":"civl","courses_avg":76.83,"courses_fail":1},{"courses_dept":"civl","courses_avg":76.83,"courses_fail":1},{"courses_dept":"comm","courses_avg":75.65,"courses_fail":1},{"courses_dept":"germ","courses_avg":76.99,"courses_fail":13},{"courses_dept":"musc","courses_avg":60.04,"courses_fail":4},{"courses_dept":"musc","courses_avg":60.04,"courses_fail":4},{"courses_dept":"span","courses_avg":70.38,"courses_fail":51},{"courses_dept":"spph","courses_avg":82.95,"courses_fail":1}]
+}
