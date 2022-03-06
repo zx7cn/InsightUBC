@@ -33,7 +33,8 @@ describe("InsightFacade", function () {
 		invalidFormat: "./test/resources/archives/invalid_format.zip",
 		invalidNoCourses: "./test/resources/archives/invalid_no_courses.zip",
 		invalidNoSections: "./test/resources/archives/invalid_no_sections.zip",
-		sm: "./test/resources/archives/single_multi_valid.zip"
+		sm: "./test/resources/archives/single_multi_valid.zip",
+		ss: "./test/resources/archives/single_single_valid.zip"
 	};
 
 	before(function () {
@@ -86,6 +87,21 @@ describe("InsightFacade", function () {
 				expect(result).to.deep.equal(expected);
 			});
 		});
+
+		it("Should add multiple valid dataset2", function () {
+			const id1: string = "courses2";
+			const id2: string = "courses";
+			const content1: string = datasetContents.get("sm") ?? "";
+			const content2: string = datasetContents.get("ss") ?? "";
+			const expected: string[] = [id1,id2];
+			return insightFacade.addDataset(id1, content1, InsightDatasetKind.Courses).then(()=>{
+				return insightFacade.addDataset(id2, content2, InsightDatasetKind.Courses);
+			})
+				.then((result: string[])=> {
+					expect(result).to.deep.equal(expected);
+				});
+		});
+
 		it("should contain at least one course with at least one section", function() {
 			let content: string = datasetContents.get("validOneOne") ?? "";
 			return insightFacade.addDataset("single-single", content, InsightDatasetKind.Courses)

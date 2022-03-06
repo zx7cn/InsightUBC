@@ -59,7 +59,8 @@ function validJSONFile(file: any): boolean {
 }
 
 function parseDataset(data: any): InsightResult[] {
-	let parsedDatasets: InsightResult[] = [];
+	// let parsedDatasets: InsightResult[] = [];
+	let parsedCourses: InsightResult[] = [];
 	let course = JSON.parse(data);
 	for (let i of course.result) {
 		if (i.Subject !== undefined && i.Course !== undefined
@@ -72,21 +73,22 @@ function parseDataset(data: any): InsightResult[] {
 				i.Year = 1900;
 			}
 
-			let parsedData: InsightResult = {
+			let courseData = {
 				dept: i.Subject, id: i.Course,
 				avg: i.Avg, instructor: i.Professor,
 				title: i.Title, pass: i.Pass,
 				fail: i.Fail, audit: i.Audit,
 				uuid: i.id.toString(), year: Number(i.Year)
 			};
-			parsedDatasets.push(parsedData);
+			// parsedDatasets.push(parsedData);
+			parsedCourses.push(courseData);
 		}
 	}
-	return parsedDatasets;
+	return parsedCourses;
 }
 
-function countRows (sectionSet: InsightResult[]): number {
-	return sectionSet.length;
+function countRows (dataset: InsightResult[]): number {
+	return dataset.length;
 }
 
 export {datasetExists, parseDataset, validJSONFile, unzipFile, countRows};

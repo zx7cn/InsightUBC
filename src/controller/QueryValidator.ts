@@ -173,7 +173,7 @@ export default class QueryValidator {
 		} else if (queryOptions.COLUMNS.length < 1) {
 			throw new InsightError("COLUMNS must be an array containing at least one key");
 		} else if ((!Object.keys(queryOptions).includes("ORDER") && Object.keys(queryOptions).length > 1)
-					|| Object.keys(queryOptions).length > 2) {
+			|| Object.keys(queryOptions).length > 2) {
 			throw new InsightError("Invalid keys in OPTIONS");
 		}
 		this.checkCOLUMNS(queryOptions.COLUMNS, parent);
