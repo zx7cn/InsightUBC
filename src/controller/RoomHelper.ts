@@ -161,7 +161,7 @@ function getGeolocation(address: string): Promise<any> {
 				try {
 					let geoResponse = JSON.parse(json);
 					let result: any[];
-					if(!geoResponse.lat && !geoResponse.lon) {
+					if(geoResponse.lat && geoResponse.lon) {
 						result = [geoResponse.lat, geoResponse.lon];
 						resolve(result);
 					}
