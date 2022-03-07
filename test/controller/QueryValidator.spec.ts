@@ -83,7 +83,6 @@ describe("ValidateEBNF", function () {
 		},
 		OPTIONS: {COLUMNS: ["courses_dept",	"courses_id", "courses_avg"], ORDER: "courses_avg"}
 	};
-
 	it("should validate a valid simple query", function () {
 		try {
 			validator = new QueryValidator(simpleQuery);

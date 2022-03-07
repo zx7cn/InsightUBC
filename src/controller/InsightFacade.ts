@@ -8,10 +8,11 @@ import {
 } from "./IInsightFacade";
 import QueryValidator from "./QueryValidator";
 
-import {countRows, datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
+import {countRows, datasetExists, unzipFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
 import {AST} from "./QueryValidatorInterfaces";
 import {buildResponse} from "./QueryResponse";
+import {getRooms} from "./RoomHelper";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -32,54 +33,61 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-		if(id === "" || id === null) {
-			return Promise.reject(new InsightError("id cannot be empty or null"));
+		if (id === "" || id === null || id.trim().length === 0 || id.includes("_")) {
+			return Promise.reject(new InsightError("invalid id"));
 		}
-
-		if(id.trim().length === 0 || id.includes("_")) {
-			return Promise.reject(new InsightError("id cannot only be whitespace or cannot contain " +
-				"an underscore"));
-		}
-
-		if(kind !== "courses") {
+		if(kind !== "courses" && kind !== "rooms") {
 			return Promise.reject(new InsightError("invalid dataset kind"));
 		}
-
 		if(datasetExists(id, this.datasets)) {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
-		return unzipFile(content).then((parsedSections) => {
-			if(countRows(parsedSections) === 0) {
-				return Promise.reject(new InsightError("no valid section"));
-			}
-
-			this.datasetObjects.set(id, parsedSections);
-
-			let newDataset: InsightDataset = {
-				id: id,
-				kind: kind,
-				numRows: countRows(parsedSections)
-			};
-			this.datasets.push(newDataset);
-			if (!fs.pathExistsSync("./data/")) {
-				fs.mkdirsSync("./data/");
-			}
-
-			let jsonOut: object[] = Array.from(parsedSections.entries()); // Need to fix this to generate objects
-			fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
-			// fs.writeFileSync("./data/" + id + ".json", JSON.stringify(parsedDataArray));
-			this.datasetIDs.push(id);
-
-			return Promise.resolve(this.datasetIDs);
-		});
+		if(kind === "courses") {
+			return unzipFile(content).then((parsedSections) => {
+				if (countRows(parsedSections) === 0) {
+					return Promise.reject(new InsightError("no valid section"));
+				}
+				this.datasetObjects.set(id, parsedSections);
+				let newDataset: InsightDataset = {
+					id: id, kind: kind, numRows: countRows(parsedSections)
+				};
+				this.datasets.push(newDataset);
+				if (!fs.pathExistsSync("./data/")) {
+					fs.mkdirsSync("./data/");
+				}
+				let jsonOut: object[] = Array.from(parsedSections.entries());
+				fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
+				this.datasetIDs.push(id);
+				return Promise.resolve(this.datasetIDs);
+			});
+		} else {
+			return getRooms(content).then((parsedRooms) => {
+				if (countRows(parsedRooms) === 0) {
+					return Promise.reject(new InsightError("no valid section"));
+				}
+				this.datasetObjects.set(id, parsedRooms);
+				let newDataset: InsightDataset = {
+					id: id, kind: kind, numRows: countRows(parsedRooms)
+				};
+				this.datasets.push(newDataset);
+				if (!fs.pathExistsSync("./data/")) {
+					fs.mkdirsSync("./data/");
+				}
+				let jsonOut: object[] = Array.from(parsedRooms.entries());
+				fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
+				this.datasetIDs.push(id);
+				return Promise.resolve(this.datasetIDs);
+			});
+		}
 	}
+
 
 	public removeDataset(id: string): Promise<string> {
 		if(id === "" || id === null) {
 			return Promise.reject(new InsightError("id cannot be empty or null"));
 		}
 
-		if(id.trim().length === 0 || id.includes("_")) {
+		if (id.trim().length === 0 || id.includes("_")) {
 			return Promise.reject(new InsightError("id cannot only be whitespace or cannot contain " +
 				"an underscore"));
 		}
