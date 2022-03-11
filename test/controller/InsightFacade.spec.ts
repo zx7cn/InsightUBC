@@ -24,6 +24,7 @@ describe("InsightFacade", function () {
 	// automatically be loaded in the 'before' hook.
 	const datasetsToLoad: {[key: string]: string} = {
 		courses: "./test/resources/archives/courses.zip",
+		rooms: "./test/resources/archives/rooms.zip",
 		validOneOne: "./test/resources/archives/single_single_valid.zip",
 		validOneMany: "./test/resources/archives/single_multi_valid.zip",
 		validManyOne: "./test/resources/archives/multi_single_valid.zip",
@@ -281,6 +282,7 @@ describe("InsightFacade", function () {
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises = [
 				insightFacade.addDataset("courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses),
+				insightFacade.addDataset("rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms),
 			];
 
 			return Promise.all(loadDatasetPromises);
