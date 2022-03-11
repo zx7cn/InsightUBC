@@ -98,6 +98,7 @@ describe("InsightFacade", function () {
 			});
 		});
 
+
 		it("Should add multiple valid dataset2", function () {
 			const id1: string = "courses2";
 			const id2: string = "courses";
@@ -227,6 +228,19 @@ describe("InsightFacade", function () {
 						id: "courses",
 						kind: InsightDatasetKind.Courses,
 						numRows: 64612,
+					}]);
+				});
+		});
+
+		it("should list one room dataset", function() {
+			const content: string = datasetContents.get("rooms") ?? "";
+			return insightFacade.addDataset("rooms", content, InsightDatasetKind.Rooms)
+				.then((addedIds) => insightFacade.listDatasets())
+				.then((insightDatasets) => {
+					expect(insightDatasets).to.deep.equal( [{
+						id: "rooms",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 364,
 					}]);
 				});
 		});

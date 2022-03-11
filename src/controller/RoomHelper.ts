@@ -33,79 +33,81 @@ function traverse(node: any, targetNode: string): any {
 }
 
 
-async function getBuildings(content: string): Promise<InsightResult[]> {
-	let buildingSet: InsightResult[] = [];
+function getBuildings(content: string): Promise<InsightResult[]> {
 	let zip = new JSZip();
-	try {
-		await zip.loadAsync(content, {base64: true}).then(function (data) {
-			zip.folder("rooms")?.file("index.htm")?.async("string").then((index: string) => {
-				return parse5.parse(index);
-			}).then((parsedIndex) => {
-				return traverse(parsedIndex, "tbody");
-			}).then((buildingTbody) => {
-				for (let node of buildingTbody.childNodes) {
-					if (node.nodeName === "tr") {
-						let buildingCode: string = node.childNodes[3].childNodes[0].value.toString().trim();
-						let buildingName: string = node.childNodes[5].childNodes[1].childNodes[0].value
-							.toString().trim();
-						let buildingAddress: string = node.childNodes[7].childNodes[0].value.toString().trim();
-						let buildingLink: string = node.childNodes[9].childNodes[1].attrs[0].value.toString().trim();
+	let buildingSet: InsightResult[] = [];
+	return new Promise<InsightResult[]>((resolve, reject) => {
+		try {
+			zip.loadAsync(content, {base64: true}).then(function (data) {
+				zip.folder("rooms")?.file("index.htm")?.async("string").then((index: string) => {
+					return parse5.parse(index);
+				}).then((parsedIndex) => {
+					return traverse(parsedIndex, "tbody");
+				}).then((buildingTbody) => {
+					for (let node of buildingTbody.childNodes) {
+						if (node.nodeName === "tr") {
+							let buildingCode: string = node.childNodes[3].childNodes[0].value.toString().trim();
+							let buildingName: string = node.childNodes[5].childNodes[1].childNodes[0].value
+								.toString().trim();
+							let buildingAddress: string = node.childNodes[7].childNodes[0].value.toString().trim();
+							let buildingLink: string = node.childNodes[9].childNodes[1].attrs[0].value
+								.toString().trim();
 
-						let building: InsightResult = {
-							fullname: buildingName,
-							shortname: buildingCode,
-							address: buildingAddress,
-							herf: buildingLink
-						};
-						buildingSet.push(building);
+							let building: InsightResult = {
+								fullname: buildingName,
+								shortname: buildingCode,
+								address: buildingAddress,
+								herf: buildingLink
+							};
+							buildingSet.push(building);
+						}
 					}
-				}
+				}).then(() => {
+					resolve(buildingSet);
+				});
 			});
-		}).catch((e) => {
-			e.print();
-		});
-		return Promise.resolve(buildingSet);
-	} catch(e) {
-		return Promise.reject(new InsightError("Error getting buildings"));
-	}
+		} catch(e) {
+			reject(new InsightError("Error getting buildings"));
+		}
+	});
 }
 
 
 function getRoom(content: string): Promise<any> {
 	let rooms: any[] = [];
 	return new Promise((resolve, reject) => {
-		getBuildings(content).then((buildingSet: any) => {
+		getBuildings(content).then(async (buildingSet: any) => {
 			for (const building of buildingSet) {
 				let bFullname = building.fullname;
 				let bShortname = building.shortname;
 				let bHerf = building.herf;
 				let bAddress = building.address;
-				setLatLon(content, bFullname, bShortname, bAddress, bHerf)
+				// eslint-disable-next-line no-await-in-loop
+				await setLatLon(content, bFullname, bShortname, bAddress, bHerf)
 					.then((parsedRoom) => {
 						rooms.push(parsedRoom);
 					});
 			}
 			resolve(rooms);
 		}).catch((e: any) => {
-			console.log(e);
 			reject(new InsightError("Error getting rooms"));
 		});
 	});
 }
 
 
-function parseRooms(content: string, bFullname: string, bShortname: string, bAddress: string,
+async function parseRooms(content: string, bFullname: string, bShortname: string, bAddress: string,
 	bHerf: string, bLat: number, bLon: number): Promise<InsightResult[]> {
 	let parsedRooms: any[] = [];
 	let zip = new JSZip();
-	return new Promise((resolve, reject) => {
-		return zip.loadAsync(content, {base64: true}).then(function (data) {
+	try {
+		await zip.loadAsync(content, {base64: true}).then(function (data) {
 			zip.folder("rooms")?.file("rooms" + bHerf.substring(2))?.async("string").then((room: string) => {
 				return parse5.parse(room);
-			}).then((parsedData) => {
-				return traverse(parsedData, "tbody");
-			}).then((roomtbody) => {
-				for (let node of roomtbody.childNode) {
+			}).then((parsedRoom) => {
+				return traverse(parsedRoom, "tbody");
+			}).then((roomTbody) => {
+				for (let node of roomTbody.childNodes) {
 					if (node.nodeName === "tr") {
 						let roomNumber: string = node.childNodes[1].childNodes[1].childNodes[0].value.toString().trim();
 						let roomSeats: number = Number(node.childNodes[3].childNodes[0].value.toString().trim());
@@ -128,27 +130,25 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 						parsedRooms.push(room);
 					}
 				}
-			}).then(() => {
-				resolve(parsedRooms);
-			}).catch((e) => {
-				reject(new InsightError("Error getting room info"));
+				console.log(parsedRooms);
 			});
 		});
-	});
+		return Promise.resolve(parsedRooms);
+	} catch(e) {
+		return Promise.reject(new InsightError("Error getting rooms"));
+	}
 }
 
 
-function setLatLon(content: string, bFullname: string, bShortname: string, bAddress: string, bHerf: string):
+async function setLatLon(content: string, bFullname: string, bShortname: string, bAddress: string, bHerf: string):
 	Promise<any> {
-	return new Promise((resolve, reject) => {
-		getGeolocation(bAddress).then((result) => {
-			return parseRooms(content, bFullname, bShortname, bAddress, bHerf, result[0], result[1])
-				.then((res) => {
-					resolve(res);
-				});
-		}).catch((e) => {
-			reject(new InsightError("Error"));
-		});
+	await getGeolocation(bAddress).then((result) => {
+		return parseRooms(content, bFullname, bShortname, bAddress, bHerf, result[0], result[1])
+			.then((res) => {
+				return Promise.resolve(res);
+			});
+	}).catch((e) => {
+		return Promise.reject(new InsightError("Error"));
 	});
 }
 
