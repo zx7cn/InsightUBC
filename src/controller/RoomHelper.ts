@@ -76,11 +76,10 @@ function getRooms(content: string): Promise<any> {
 				roomPromises.push(setLatLon(content, bFullname, bShortname, bAddress, bHerf));
 			}
 			return Promise.all(roomPromises).then((parsedRooms) => {
-				for(const i of parsedRooms) {
+				for (const i of parsedRooms) {
 					rooms = rooms.concat(i);
 				}
 			}).then(() => {
-				// console.log(rooms);
 				resolve(rooms);
 			}).catch((e: any) => {
 				console.log(e);
@@ -144,7 +143,6 @@ function setLatLon(content: string, bFullname: string, bShortname: string, bAddr
 		getGeolocation(bAddress).then((result) => {
 			return parseRooms(content, bFullname, bShortname, bAddress, bHerf, result[0], result[1])
 				.then((res) => {
-					// console.log(res);
 					resolve(res);
 				});
 		}).catch((e) => {
@@ -183,4 +181,5 @@ function getGeolocation(address: string): Promise<any> {
 	});
 }
 
-export{getRooms, getBuildings};
+export{getRooms};
+

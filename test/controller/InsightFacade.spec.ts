@@ -88,31 +88,6 @@ describe("InsightFacade", function () {
 				expect(result).to.deep.equal(expected);
 			});
 		});
-
-		it("should add a valid room dataset", function() {
-			const id: string = "rooms";
-			const content: string = datasetContents.get("rooms") ?? "";
-			const expected: string[] = [id];
-			return insightFacade.addDataset(id, content, InsightDatasetKind.Rooms).then((result: string[]) => {
-				expect(result).to.deep.equal(expected);
-			});
-		});
-
-
-		it("Should add multiple valid dataset2", function () {
-			const id1: string = "courses2";
-			const id2: string = "courses";
-			const content1: string = datasetContents.get("sm") ?? "";
-			const content2: string = datasetContents.get("ss") ?? "";
-			const expected: string[] = [id1,id2];
-			return insightFacade.addDataset(id1, content1, InsightDatasetKind.Courses).then(()=>{
-				return insightFacade.addDataset(id2, content2, InsightDatasetKind.Courses);
-			})
-				.then((result: string[])=> {
-					expect(result).to.deep.equal(expected);
-				});
-		});
-
 		it("should contain at least one course with at least one section", function() {
 			let content: string = datasetContents.get("validOneOne") ?? "";
 			return insightFacade.addDataset("single-single", content, InsightDatasetKind.Courses)
@@ -232,19 +207,6 @@ describe("InsightFacade", function () {
 				});
 		});
 
-		it("should list one room dataset", function() {
-			const content: string = datasetContents.get("rooms") ?? "";
-			return insightFacade.addDataset("rooms", content, InsightDatasetKind.Rooms)
-				.then((addedIds) => insightFacade.listDatasets())
-				.then((insightDatasets) => {
-					expect(insightDatasets).to.deep.equal( [{
-						id: "rooms",
-						kind: InsightDatasetKind.Rooms,
-						numRows: 364,
-					}]);
-				});
-		});
-
 		it("should list one dataset2", function() {
 			const content: string = datasetContents.get("sm") ?? "";
 			return insightFacade.addDataset("sm", content, InsightDatasetKind.Courses)
@@ -254,6 +216,28 @@ describe("InsightFacade", function () {
 						id: "sm",
 						kind: InsightDatasetKind.Courses,
 						numRows: 8,
+					}]);
+				});
+		});
+
+		it("should add a valid room dataset", function() {
+			const id: string = "rooms";
+			const content: string = datasetContents.get("rooms") ?? "";
+			const expected: string[] = [id];
+			return insightFacade.addDataset(id, content, InsightDatasetKind.Rooms).then((result: string[]) => {
+				expect(result).to.deep.equal(expected);
+			});
+		});
+
+		it("should list one room dataset", function() {
+			const content: string = datasetContents.get("rooms") ?? "";
+			return insightFacade.addDataset("rooms", content, InsightDatasetKind.Rooms)
+				.then((addedIds) => insightFacade.listDatasets())
+				.then((insightDatasets) => {
+					expect(insightDatasets).to.deep.equal( [{
+						id: "rooms",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 364,
 					}]);
 				});
 		});
