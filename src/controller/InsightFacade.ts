@@ -8,11 +8,11 @@ import {
 } from "./IInsightFacade";
 import QueryValidator from "./QueryValidator";
 
-import {countRows, datasetExists, unzipFile} from "./DatasetHelper";
+import {countRows, datasetExists, parseDataset, unzipFile, validJSONFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
 import {AST} from "./QueryValidatorInterfaces";
 import {buildResponse} from "./QueryResponse";
-import {getBuildings, getRooms} from "./RoomHelper";
+import {getRooms} from "./RoomHelper";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -43,7 +43,7 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
 		if(kind === "courses") {
-			return getRooms(content).then((parsedSections) => {
+			return unzipFile(content).then((parsedSections) => {
 				if (countRows(parsedSections) === 0) {
 					return Promise.reject(new InsightError("no valid section"));
 				}
@@ -81,13 +81,12 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
-
 	public removeDataset(id: string): Promise<string> {
 		if(id === "" || id === null) {
 			return Promise.reject(new InsightError("id cannot be empty or null"));
 		}
 
-		if (id.trim().length === 0 || id.includes("_")) {
+		if(id.trim().length === 0 || id.includes("_")) {
 			return Promise.reject(new InsightError("id cannot only be whitespace or cannot contain " +
 				"an underscore"));
 		}
