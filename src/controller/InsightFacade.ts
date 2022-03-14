@@ -12,7 +12,7 @@ import {countRows, datasetExists, unzipFile} from "./DatasetHelper";
 import * as fs from "fs-extra";
 import {AST} from "./QueryValidatorInterfaces";
 import {buildResponse} from "./QueryResponse";
-import {getBuildings, getRooms} from "./RoomHelper";
+import {getRooms} from "./RoomHelper";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -43,7 +43,7 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new InsightError("dataset already exists"));
 		}
 		if(kind === "courses") {
-			return getRooms(content).then((parsedSections) => {
+			return unzipFile(content).then((parsedSections) => {
 				if (countRows(parsedSections) === 0) {
 					return Promise.reject(new InsightError("no valid section"));
 				}

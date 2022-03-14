@@ -65,6 +65,7 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 
 function getRooms(content: string): Promise<any> {
 	let rooms: any[] = [];
+	let roomPromises: any[] = [];
 	return new Promise((resolve, reject) => {
 		getBuildings(content).then(async (buildingSet: any) => {
 			for (const building of buildingSet) {
@@ -72,22 +73,24 @@ function getRooms(content: string): Promise<any> {
 				let bShortname = building.shortname;
 				let bHerf = building.herf;
 				let bAddress = building.address;
-				// eslint-disable-next-line no-await-in-loop
-				const parsedRoom = await setLatLon(content, bFullname, bShortname, bAddress, bHerf);
-				// console.log(parsedRoom);
-				rooms = rooms.concat(parsedRoom);
+				roomPromises.push(setLatLon(content, bFullname, bShortname, bAddress, bHerf));
 			}
-		}).then(() => {
-			// console.log(rooms);
-			resolve(rooms);
-		}).catch((e: any) => {
-			console.log(e);
-			reject(new InsightError("Error getting rooms"));
+			return Promise.all(roomPromises).then((parsedRooms) => {
+				for(const i of parsedRooms) {
+					rooms = rooms.concat(i);
+				}
+			}).then(() => {
+				// console.log(rooms);
+				resolve(rooms);
+			}).catch((e: any) => {
+				console.log(e);
+				reject(new InsightError("Error getting rooms"));
+			});
 		});
 	});
 }
-//
-//
+
+
 function parseRooms(content: string, bFullname: string, bShortname: string, bAddress: string, bHerf: string,
 	bLat: number, bLon: number): Promise<any> {
 	let parsedRooms: any[] = [];
