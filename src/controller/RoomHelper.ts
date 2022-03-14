@@ -3,18 +3,10 @@ import JSZip from "jszip";
 import parse5 from "parse5";
 import http from "http";
 
-// function validHTMLFile(file: any): boolean {
-// 	try {
-// 		parse5.parse(file);
-// 		return true;
-// 	} catch(e) {
-// 		return false;
-// 	}
-// }
 
 function traverse(node: any, targetNode: string): any {
 	if (!node) {
-		return;
+		return null;
 	}
 	if(node.nodeName !== undefined) {
 		if (node.nodeName === targetNode) {
@@ -24,12 +16,12 @@ function traverse(node: any, targetNode: string): any {
 	if(node.childNodes !== undefined) {
 		for (let i of node.childNodes) {
 			let result = traverse(i, targetNode);
-			if(result !== undefined) {
+			if(result !== null) {
 				return result;
 			}
 		}
 	}
-	return;
+	return null;
 }
 
 
@@ -38,8 +30,8 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 	let buildingSet: InsightResult[] = [];
 	return new Promise<InsightResult[]>((resolve, reject) => {
 		try {
-			return zip.loadAsync(content, {base64: true}).then(function (data) {
-				zip.folder("rooms")?.file("index.htm")?.async("string").then(function (index: string) {
+			zip.loadAsync(content, {base64: true}).then(function (data) {
+				return zip.folder("rooms")?.file("index.htm")?.async("string").then(function (index: string) {
 					return parse5.parse(index);
 				}).then((parsedIndex) => {
 					let buildingTbody = traverse(parsedIndex, "tbody");
@@ -82,8 +74,8 @@ function getRooms(content: string): Promise<any> {
 				let bAddress = building.address;
 				// eslint-disable-next-line no-await-in-loop
 				const parsedRoom = await setLatLon(content, bFullname, bShortname, bAddress, bHerf);
-				console.log(parsedRoom);
-				rooms.push(parsedRoom);
+				// console.log(parsedRoom);
+				rooms = rooms.concat(parsedRoom);
 			}
 		}).then(() => {
 			// console.log(rooms);
@@ -102,36 +94,38 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 	let zip = new JSZip();
 	try {
 		return zip.loadAsync(content, {base64: true}).then((data) => {
-			zip.folder("rooms")?.file(bHerf.substring(2))?.async("string").then((room: string) => {
+			return zip.folder("rooms")?.file(bHerf.substring(2))?.async("string").then((room: string) => {
 				return parse5.parse(room);
 			}).then((parsedRoom) => {
 				let roomTbody = traverse(parsedRoom, "tbody");
-				for (let node of roomTbody.childNodes) {
-					if (node.nodeName === "tr") {
-						let roomNumber: string = node.childNodes[1].childNodes[1].childNodes[0].value
-							.toString().trim();
-						let roomSeats: number = Number(node.childNodes[3].childNodes[0].value.toString().trim());
-						let roomType: string = node.childNodes[7].childNodes[0].value.toString().trim();
-						let roomFurniture: string = node.childNodes[5].childNodes[0].value.toString().trim();
+				if(roomTbody !== null) {
+					for (let node of roomTbody.childNodes) {
+						if (node.nodeName === "tr") {
+							let roomNumber: string = node.childNodes[1].childNodes[1].childNodes[0].value
+								.toString().trim();
+							let roomSeats: number = Number(node.childNodes[3].childNodes[0].value.toString().trim());
+							let roomType: string = node.childNodes[7].childNodes[0].value.toString().trim();
+							let roomFurniture: string = node.childNodes[5].childNodes[0].value.toString().trim();
 
-						let room: InsightResult = {
-							fullname: bFullname,
-							shortname: bShortname,
-							number: roomNumber,
-							name: bShortname + "_" + roomNumber,
-							address: bAddress,
-							lat: bLat,
-							lon: bLon,
-							seats: roomSeats,
-							type: roomType,
-							furniture: roomFurniture,
-							href: bHerf
-						};
-						parsedRooms.push(room);
+							let room: InsightResult = {
+								fullname: bFullname,
+								shortname: bShortname,
+								number: roomNumber,
+								name: bShortname + "_" + roomNumber,
+								address: bAddress,
+								lat: bLat,
+								lon: bLon,
+								seats: roomSeats,
+								type: roomType,
+								furniture: roomFurniture,
+								href: bHerf
+							};
+							parsedRooms.push(room);
+						}
 					}
 				}
 			}).then(() => {
-				console.log(parsedRooms);
+				// console.log(parsedRooms);
 				return Promise.resolve(parsedRooms);
 			});
 		});
