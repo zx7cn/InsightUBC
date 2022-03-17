@@ -63,11 +63,11 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 	});
 }
 
-function getRooms(content: string): Promise<any> {
-	let rooms: any[] = [];
-	let roomPromises: any[] = [];
+function getRooms(content: string): Promise<InsightResult[]> {
+	let rooms: InsightResult[] = [];
+	let roomPromises: Array<Promise<any>> = [];
 	return new Promise((resolve, reject) => {
-		getBuildings(content).then(async (buildingSet: any) => {
+		getBuildings(content).then((buildingSet: any) => {
 			for (const building of buildingSet) {
 				let bFullname = building.fullname;
 				let bShortname = building.shortname;
@@ -82,7 +82,6 @@ function getRooms(content: string): Promise<any> {
 			}).then(() => {
 				resolve(rooms);
 			}).catch((e: any) => {
-				console.log(e);
 				reject(new InsightError("Error getting rooms"));
 			});
 		});
@@ -127,7 +126,6 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 					}
 				}
 			}).then(() => {
-				// console.log(parsedRooms);
 				return Promise.resolve(parsedRooms);
 			});
 		});
@@ -146,8 +144,7 @@ function setLatLon(content: string, bFullname: string, bShortname: string, bAddr
 					resolve(res);
 				});
 		}).catch((e) => {
-			console.log(e);
-			reject(new InsightError("Error"));
+			reject(new InsightError("Error Setting Lat Lon"));
 		});
 	});
 }
