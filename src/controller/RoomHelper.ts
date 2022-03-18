@@ -28,6 +28,11 @@ function traverse(node: any, targetNode: string): any {
 function getBuildings(content: string): Promise<InsightResult[]> {
 	let zip = new JSZip();
 	let buildingSet: InsightResult[] = [];
+	let buildingCode: string;
+	let buildingName: string;
+	let buildingAddress: string;
+	let buildingLink: string;
+	let building: InsightResult;
 	return new Promise<InsightResult[]>((resolve, reject) => {
 		try {
 			zip.loadAsync(content, {base64: true}).then(function (data) {
@@ -37,19 +42,24 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 					let buildingTbody = traverse(parsedIndex, "tbody");
 					for (let node of buildingTbody.childNodes) {
 						if (node.nodeName === "tr") {
-							let buildingCode: string = node.childNodes[3].childNodes[0].value.toString().trim();
-							let buildingName: string = node.childNodes[5].childNodes[1].childNodes[0].value
-								.toString().trim();
-							let buildingAddress: string = node.childNodes[7].childNodes[0].value.toString().trim();
-							let buildingLink: string = node.childNodes[9].childNodes[1].attrs[0].value
-								.toString().trim();
-
-							let building: InsightResult = {
-								fullname: buildingName,
-								shortname: buildingCode,
-								address: buildingAddress,
-								herf: buildingLink
-							};
+							for(let i of node.childNodes) {
+								if(i.nodeName === "td" && i.attrs) {
+									if(i.attrs[0].value === "views-field views-field-field-building-code") {
+										buildingCode = i.childNodes[0].value.toString().trim();
+									}
+									if(i.attrs[0].value === "views-field views-field-title") {
+										buildingName = i.childNodes[1].childNodes[0].value.toString().trim();
+									}
+									if(i.attrs[0].value === "views-field views-field-field-building-address") {
+										buildingAddress = i.childNodes[0].value.toString().trim();
+									}
+									if(i.attrs[0].value === "views-field views-field-nothing") {
+										buildingLink = i.childNodes[1].attrs[0].value.toString().trim();
+									}
+									building = {fullname: buildingName, shortname: buildingCode,
+										address: buildingAddress, herf: buildingLink};
+								}
+							}
 							buildingSet.push(building);
 						}
 					}
@@ -93,39 +103,45 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 	bLat: number, bLon: number): Promise<any> {
 	let parsedRooms: any[] = [];
 	let zip = new JSZip();
+	let roomNumber: string;
+	let roomSeats: number;
+	let roomFurniture: string;
+	let roomType: string;
+	let room: InsightResult;
 	try {
 		return zip.loadAsync(content, {base64: true}).then((data) => {
-			return zip.folder("rooms")?.file(bHerf.substring(2))?.async("string").then((room: string) => {
-				return parse5.parse(room);
+			return zip.folder("rooms")?.file(bHerf.substring(2))?.async("string").then((roomData: string) => {
+				return parse5.parse(roomData);
 			}).then((parsedRoom) => {
-				let roomTbody = traverse(parsedRoom, "tbody");
-				if(roomTbody !== null) {
-					for (let node of roomTbody.childNodes) {
+				if(traverse(parsedRoom, "tbody") !== null) {
+					for (let node of traverse(parsedRoom, "tbody").childNodes) {
 						if (node.nodeName === "tr") {
-							let roomNumber: string = node.childNodes[1].childNodes[1].childNodes[0].value
-								.toString().trim();
-							let roomSeats: number = Number(node.childNodes[3].childNodes[0].value.toString().trim());
-							let roomType: string = node.childNodes[7].childNodes[0].value.toString().trim();
-							let roomFurniture: string = node.childNodes[5].childNodes[0].value.toString().trim();
-
-							let room: InsightResult = {
-								fullname: bFullname,
-								shortname: bShortname,
-								number: roomNumber,
-								name: bShortname + "_" + roomNumber,
-								address: bAddress,
-								lat: bLat,
-								lon: bLon,
-								seats: roomSeats,
-								type: roomType,
-								furniture: roomFurniture,
-								href: bHerf
-							};
+							for(let i of node.childNodes) {
+								if(i.nodeName === "td" && i.attrs) {
+									if(i.attrs[0].value === "views-field views-field-field-room-number") {
+										roomNumber = i.childNodes[1].childNodes[0].value.toString().trim();
+									}
+									if(i.attrs[0].value === "views-field views-field-field-room-capacity") {
+										roomSeats = Number(i.childNodes[0].value.toString().trim());
+									}
+									if(i.attrs[0].value === "views-field views-field-field-room-furniture") {
+										roomFurniture = i.childNodes[0].value.toString().trim();
+									}
+									if(i.attrs[0].value === "views-field views-field-field-room-type") {
+										roomType = i.childNodes[0].value.toString().trim();
+									}
+									room = {fullname: bFullname, shortname: bShortname, number: roomNumber,
+										name: bShortname + "_" + roomNumber, address: bAddress, lat: bLat,
+										lon: bLon, seats: roomSeats, type: roomType, furniture: roomFurniture,
+										href: bHerf};
+								}
+							}
 							parsedRooms.push(room);
 						}
 					}
 				}
 			}).then(() => {
+				// console.log(parsedRooms);
 				return Promise.resolve(parsedRooms);
 			});
 		});
