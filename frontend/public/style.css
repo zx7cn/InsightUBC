@@ -12,3 +12,21 @@
 .button:hover {
 	cursor: pointer;
 }
+
+table{
+	width: 60%;
+	border-collapse: collapse;
+	text-align: center;
+	font: 14px Helvetica;
+}
+
+tr:nth-child(even) {
+	background: #f2f2f2;
+}
+
+th {
+	font-weight: bold;
+	background-color: #b5e4f7;
+	color: black;
+}
+
