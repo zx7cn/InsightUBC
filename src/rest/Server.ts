@@ -132,7 +132,7 @@ export default class Server {
 
 	private static putDataset(req: Request, res: Response) {
 		try {
-			if(req.params.insightDatasetKind === "courses") {
+			if(req.params.kind === "courses") {
 				insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
 					, InsightDatasetKind.Courses)
 					.then((arr) => {
@@ -140,7 +140,7 @@ export default class Server {
 					}).catch((err) => {
 						res.status(400).json({error: err});
 					});
-			} else if(req.params.insightDatasetKind === "rooms") {
+			} else if(req.params.kind === "rooms") {
 				insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
 					, InsightDatasetKind.Rooms)
 					.then((arr) => {
