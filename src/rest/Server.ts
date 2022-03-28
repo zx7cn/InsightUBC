@@ -5,6 +5,7 @@ import InsightFacade from "../controller/InsightFacade";
 import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
 import * as fs from "fs-extra";
 
+
 let insightFacade: InsightFacade;
 export default class Server {
 	private readonly port: number;
@@ -20,6 +21,7 @@ export default class Server {
 		this.registerMiddleware();
 		this.registerRoutes();
 		insightFacade = new InsightFacade();
+
 		// preload courses and rooms datasets for C3 frontend Demo
 		const datasetContents = new Map<string, string>();
 		const datasetsToLoad: {[key: string]: string} = {
@@ -187,6 +189,7 @@ export default class Server {
 			res.status(400).json({error: err});
 		}
 	}
+
 
 	private static getDataset(req: Request, res: Response) {
 		try {
