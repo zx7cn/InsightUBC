@@ -3,6 +3,8 @@ import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
 import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
+import * as fs from "fs-extra";
+
 
 let insightFacade: InsightFacade;
 export default class Server {
@@ -19,6 +21,22 @@ export default class Server {
 		this.registerMiddleware();
 		this.registerRoutes();
 		insightFacade = new InsightFacade();
+
+		// preload courses and rooms datasets for C3 frontend Demo
+		const datasetContents = new Map<string, string>();
+		const datasetsToLoad: {[key: string]: string} = {
+			courses: "./test/resources/archives/courses.zip",
+			rooms: "./test/resources/archives/rooms.zip"
+		};
+		for (const key of Object.keys(datasetsToLoad)) {
+			const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
+			datasetContents.set(key, content);
+		}
+		insightFacade.addDataset(
+			"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses);
+		insightFacade.addDataset(
+			"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms);
+
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
 		// accessible at http://localhost:<port>/
@@ -155,18 +173,25 @@ export default class Server {
 	}
 
 	private static postQuery(req: Request, res: Response) {
+		// console.log(req.body);
+		// console.log(req.body.WHERE);
+		// console.log(req.body.WHERE.AND);
+		// console.log(req.body.WHERE.AND[0]);
+		// console.log(req.body.WHERE.AND[1]);
 		try {
-			insightFacade.performQuery(req.params.query).then((arr) => {
+			insightFacade.performQuery(req.body).then((arr) => {
 				res.status(200).json({result: arr});
 			}).catch((err) => {
-				res.status(400).json({error: err});
+				res.status(400).json({InsightError: err.message});
+				// console.log(res);
 			});
 		} catch(err) {
 			res.status(400).json({error: err});
 		}
 	}
 
-	private static getDataset(res: Response) {
+
+	private static getDataset(req: Request, res: Response) {
 		try {
 			insightFacade.listDatasets().then((arr) => {
 				res.status(200).json({result: arr});
