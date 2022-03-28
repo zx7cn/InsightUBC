@@ -73,6 +73,7 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 	});
 }
 
+
 function getRooms(content: string): Promise<InsightResult[]> {
 	let rooms: InsightResult[] = [];
 	let roomPromises: Array<Promise<any>> = [];
