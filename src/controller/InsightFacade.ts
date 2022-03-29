@@ -24,12 +24,34 @@ export default class InsightFacade implements IInsightFacade {
 	private datasets: InsightDataset[];
 	private datasetIDs: string[];
 	private datasetObjects: Map<string, InsightResult[]>;
+	private dataPath = "./data/";
 
 	constructor() {
 		console.log("InsightFacadeImpl::init()");
 		this.datasets = [];
 		this.datasetIDs = [];
 		this.datasetObjects = new Map<string, InsightResult[]>();
+		this.loadExistingSetsFromDisk();
+	}
+
+	private async loadExistingSetsFromDisk(): Promise<void> {
+		if (!fs.pathExistsSync(this.dataPath)) {
+			return;
+		}
+
+		let files = fs.readdirSync(this.dataPath);
+		files.forEach((file, index) => {
+			let idKind: string = file.split(".json")[0];
+			let id: string = idKind.split("_")[0];
+			let kind = idKind.split("_")[1] as InsightDatasetKind;
+			let newDatasetObject = JSON.parse(fs.readFileSync(this.dataPath + file).toString()) as InsightResult[];
+			let newDatasetEntry: InsightDataset = {
+				id: id, kind: kind, numRows: countRows(newDatasetObject)
+			};
+			this.datasetIDs.push(id);
+			this.datasetObjects.set(id, newDatasetObject);
+			this.datasets.push(newDatasetEntry);
+		});
 	}
 
 	public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -52,11 +74,11 @@ export default class InsightFacade implements IInsightFacade {
 					id: id, kind: kind, numRows: countRows(parsedSections)
 				};
 				this.datasets.push(newDataset);
-				if (!fs.pathExistsSync("./data/")) {
-					fs.mkdirsSync("./data/");
+				if (!fs.pathExistsSync(this.dataPath)) {
+					fs.mkdirsSync(this.dataPath);
 				}
-				let jsonOut: object[] = Array.from(parsedSections.entries());
-				fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
+				let jsonOut: object = parsedSections;
+				fs.writeFileSync(this.dataPath + id + "_" + kind + ".json", JSON.stringify(jsonOut));
 				this.datasetIDs.push(id);
 				return Promise.resolve(this.datasetIDs);
 			});
@@ -70,11 +92,11 @@ export default class InsightFacade implements IInsightFacade {
 					id: id, kind: kind, numRows: countRows(parsedRooms)
 				};
 				this.datasets.push(newDataset);
-				if (!fs.pathExistsSync("./data/")) {
-					fs.mkdirsSync("./data/");
+				if (!fs.pathExistsSync(this.dataPath)) {
+					fs.mkdirsSync(this.dataPath);
 				}
-				let jsonOut: object[] = Array.from(parsedRooms.entries());
-				fs.writeFileSync("./data/" + id + ".json", JSON.stringify(jsonOut));
+				let jsonOut: object = parsedRooms;
+				fs.writeFileSync(this.dataPath + id + "_" + kind +  ".json", JSON.stringify(jsonOut));
 				this.datasetIDs.push(id);
 				return Promise.resolve(this.datasetIDs);
 			});
@@ -95,12 +117,13 @@ export default class InsightFacade implements IInsightFacade {
 			return Promise.reject(new NotFoundError("dataset does not exist"));
 		}
 
-		for (const i of this.datasets) {
-			if (i.id === id) {
-				this.datasets.splice(this.datasets.indexOf(i),1);
+		for (const insightDataSet of this.datasets) {
+			if (insightDataSet.id === id) {
+				this.datasets.splice(this.datasets.indexOf(insightDataSet),1);
+				fs.removeSync(this.dataPath + id + "_" + insightDataSet.kind +  ".json");
+				break;
 			}
 		}
-		fs.removeSync("./data" + id + ".json");
 		return Promise.resolve(id);
 	}
 

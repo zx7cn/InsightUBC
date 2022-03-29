@@ -57,7 +57,7 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 										buildingLink = i.childNodes[1].attrs[0].value.toString().trim();
 									}
 									building = {fullname: buildingName, shortname: buildingCode,
-										address: buildingAddress, herf: buildingLink};
+										address: buildingAddress, href: buildingLink};
 								}
 							}
 							buildingSet.push(building);
@@ -82,9 +82,9 @@ function getRooms(content: string): Promise<InsightResult[]> {
 			for (const building of buildingSet) {
 				let bFullname = building.fullname;
 				let bShortname = building.shortname;
-				let bHerf = building.herf;
+				let bHref = building.href;
 				let bAddress = building.address;
-				roomPromises.push(setLatLon(content, bFullname, bShortname, bAddress, bHerf));
+				roomPromises.push(setLatLon(content, bFullname, bShortname, bAddress, bHref));
 			}
 			return Promise.all(roomPromises).then((parsedRooms) => {
 				for (const i of parsedRooms) {
@@ -100,7 +100,7 @@ function getRooms(content: string): Promise<InsightResult[]> {
 }
 
 
-function parseRooms(content: string, bFullname: string, bShortname: string, bAddress: string, bHerf: string,
+function parseRooms(content: string, bFullname: string, bShortname: string, bAddress: string, bHref: string,
 	bLat: number, bLon: number): Promise<any> {
 	let parsedRooms: any[] = [];
 	let zip = new JSZip();
@@ -108,10 +108,11 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 	let roomSeats: number;
 	let roomFurniture: string;
 	let roomType: string;
+	let roomLink: string;
 	let room: InsightResult;
 	try {
 		return zip.loadAsync(content, {base64: true}).then((data) => {
-			return zip.folder("rooms")?.file(bHerf.substring(2))?.async("string").then((roomData: string) => {
+			return zip.folder("rooms")?.file(bHref.substring(2))?.async("string").then((roomData: string) => {
 				return parse5.parse(roomData);
 			}).then((parsedRoom) => {
 				if(traverse(parsedRoom, "tbody") !== null) {
@@ -121,20 +122,19 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 								if(i.nodeName === "td" && i.attrs) {
 									if(i.attrs[0].value === "views-field views-field-field-room-number") {
 										roomNumber = i.childNodes[1].childNodes[0].value.toString().trim();
-									}
-									if(i.attrs[0].value === "views-field views-field-field-room-capacity") {
+									} else if(i.attrs[0].value === "views-field views-field-field-room-capacity") {
 										roomSeats = Number(i.childNodes[0].value.toString().trim());
-									}
-									if(i.attrs[0].value === "views-field views-field-field-room-furniture") {
+									} else if(i.attrs[0].value === "views-field views-field-field-room-furniture") {
 										roomFurniture = i.childNodes[0].value.toString().trim();
-									}
-									if(i.attrs[0].value === "views-field views-field-field-room-type") {
+									} else if(i.attrs[0].value === "views-field views-field-field-room-type") {
 										roomType = i.childNodes[0].value.toString().trim();
+									} else if(i.attrs[0].value === "views-field views-field-nothing") {
+										roomLink = i.childNodes[1].attrs[0].value.toString().trim();
 									}
 									room = {fullname: bFullname, shortname: bShortname, number: roomNumber,
 										name: bShortname + "_" + roomNumber, address: bAddress, lat: bLat,
 										lon: bLon, seats: roomSeats, type: roomType, furniture: roomFurniture,
-										href: bHerf};
+										href: roomLink};
 								}
 							}
 							parsedRooms.push(room);
@@ -152,11 +152,11 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 }
 
 
-function setLatLon(content: string, bFullname: string, bShortname: string, bAddress: string, bHerf: string):
+function setLatLon(content: string, bFullname: string, bShortname: string, bAddress: string, bHref: string):
 	Promise<InsightResult[]> {
 	return new Promise((resolve, reject) => {
 		getGeolocation(bAddress).then((result) => {
-			return parseRooms(content, bFullname, bShortname, bAddress, bHerf, result[0], result[1])
+			return parseRooms(content, bFullname, bShortname, bAddress, bHref, result[0], result[1])
 				.then((res) => {
 					resolve(res);
 				});

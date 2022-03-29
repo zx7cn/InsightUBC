@@ -22,6 +22,25 @@ export default class Server {
 		this.registerRoutes();
 		Server.insightFacade = new InsightFacade();
 
+		// preload courses and rooms datasets for C3 frontend Demo
+		const datasetContents = new Map<string, string>();
+		const datasetsToLoad: {[key: string]: string} = {
+			courses: "./src/archives/courses.zip",
+			rooms: "./src/archives/rooms.zip"
+		};
+		for (const key of Object.keys(datasetsToLoad)) {
+			const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
+			datasetContents.set(key, content);
+		}
+		Server.insightFacade.addDataset(
+			"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
+				// pass - dataset persists from before
+		});
+		Server.insightFacade.addDataset(
+			"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).catch((error) => {
+				// pass - dataset persists from before
+		});
+
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
 		// accessible at http://localhost:<port>/
@@ -44,25 +63,7 @@ export default class Server {
 			} else {
 				this.server = this.express.listen(this.port, () => {
 					console.info(`Server::start() - server listening on port: ${this.port}`);
-					// preload courses and rooms datasets for C3 frontend Demo
-					const datasetContents = new Map<string, string>();
-					const datasetsToLoad: {[key: string]: string} = {
-						courses: "./src/archives/courses.zip",
-						rooms: "./src/archives/rooms.zip"
-					};
-					for (const key of Object.keys(datasetsToLoad)) {
-						const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
-						datasetContents.set(key, content);
-					}
-					Server.insightFacade.addDataset(
-						"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).then((r) => {
-						// console.log("loaded courses");
-					});
-					Server.insightFacade.addDataset(
-						"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).then((r) => {
-						// console.log("loaded rooms");
-						resolve();
-					});
+					resolve();
 				}).on("error", (err: Error) => {
 					// catches errors in server start
 					console.error(`Server::start() - server ERROR: ${err.message}`);
