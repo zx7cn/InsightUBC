@@ -11,7 +11,7 @@ export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
-	// private insightFacade: InsightFacade;
+	private insightFacade: InsightFacade;
 
 	constructor(port: number) {
 		console.info(`Server::<init>( ${port} )`);
@@ -20,22 +20,7 @@ export default class Server {
 
 		this.registerMiddleware();
 		this.registerRoutes();
-		insightFacade = new InsightFacade();
-
-		// preload courses and rooms datasets for C3 frontend Demo
-		const datasetContents = new Map<string, string>();
-		const datasetsToLoad: {[key: string]: string} = {
-			courses: "./src/archives/courses.zip",
-			rooms: "./src/archives/rooms.zip"
-		};
-		for (const key of Object.keys(datasetsToLoad)) {
-			const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
-			datasetContents.set(key, content);
-		}
-		insightFacade.addDataset(
-			"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses);
-		insightFacade.addDataset(
-			"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms);
+		this.insightFacade = new InsightFacade();
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
@@ -59,7 +44,25 @@ export default class Server {
 			} else {
 				this.server = this.express.listen(this.port, () => {
 					console.info(`Server::start() - server listening on port: ${this.port}`);
-					resolve();
+					// preload courses and rooms datasets for C3 frontend Demo
+					const datasetContents = new Map<string, string>();
+					const datasetsToLoad: {[key: string]: string} = {
+						courses: "./src/archives/courses.zip",
+						rooms: "./src/archives/rooms.zip"
+					};
+					for (const key of Object.keys(datasetsToLoad)) {
+						const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
+						datasetContents.set(key, content);
+					}
+					this.insightFacade.addDataset(
+						"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).then((r) => {
+						// console.log("loaded courses");
+					});
+					this.insightFacade.addDataset(
+						"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).then((r) => {
+						// console.log("loaded rooms");
+						resolve();
+					});
 				}).on("error", (err: Error) => {
 					// catches errors in server start
 					console.error(`Server::start() - server ERROR: ${err.message}`);
@@ -173,20 +176,14 @@ export default class Server {
 	}
 
 	private static postQuery(req: Request, res: Response) {
-		// console.log(req.body);
-		// console.log(req.body.WHERE);
-		// console.log(req.body.WHERE.AND);
-		// console.log(req.body.WHERE.AND[0]);
-		// console.log(req.body.WHERE.AND[1]);
 		try {
 			insightFacade.performQuery(req.body).then((arr) => {
 				res.status(200).json({result: arr});
 			}).catch((err) => {
-				res.status(400).json({InsightError: err.message});
-				// console.log(res);
+				res.status(400).json({error: err.message});
 			});
-		} catch(err) {
-			res.status(400).json({error: err});
+		} catch(err: any) {
+			res.status(400).json({error: err.message});
 		}
 	}
 
