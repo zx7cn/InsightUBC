@@ -1,10 +1,5 @@
-document.getElementById("click-me-button").addEventListener("click", handleClickMe);
 document.getElementById("findRoomButton").addEventListener("click", findRooms);
 document.getElementById("findInstructorButton").addEventListener("click", findInstructors);
-
-function handleClickMe() {
-	alert("Button Clicked!");
-}
 
 function findRooms() {
 
@@ -52,9 +47,14 @@ function findRooms() {
 
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4) {
-			document.getElementById("roomsOut").innerHTML = JSON.parse(xhr.responseText);
-			alert(xhr.responseText);
-		}};
+			if (xhr.responseText.includes('error')) {
+				let errorResponse = JSON.parse(xhr.responseText).error;
+				document.getElementById("roomsOut").innerHTML = xhr.status + " Error: " + errorResponse;
+			} else {
+				createTable(JSON.parse(xhr.responseText), "roomsOut");
+			}
+		}
+	};
 }
 
 
@@ -110,50 +110,61 @@ function findInstructors() {
 
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4) {
-			//document.getElementById("instructorOut").innerHTML = JSON.parse(xhr.responseText);
-			createTable(JSON.parse(xhr.responseText));
-			//alert(xhr.responseText);
+			if (xhr.responseText.includes('error')) {
+				let errorResponse = JSON.parse(xhr.responseText).error;
+				document.getElementById("instructorOut").innerHTML = xhr.status + " Error: " + errorResponse;
+			} else {
+				createTable(JSON.parse(xhr.responseText), "instructorOut");
+			}
 		}
-		}
+	}
 }
 
 // This function is adapted from
 // https://www.encodedna.com/javascript/populate-json-data-to-html-table-using-javascript.htm
-function createTable(response) {
-	var list = [];
+function createTable(response, elementId) {
+	let list = [];
 
-	for(var i in response.result) {
+	for(let i in response.result) {
 		list.push(response.result[i]);
 	}
 
-	var col = [];
-	for (var i = 0; i < list.length; i++) {
-		for (var k in list[i]) {
+	let col = [];
+	for (let i = 0; i < list.length; i++) {
+		for (let k in list[i]) {
 			if (col.indexOf(k) === -1) {
 				col.push(k);
 			}
 		}
 	}
 
-	var table = document.createElement("table");
-	var tr = table.insertRow(-1);
+	let table = document.createElement("table");
+	let tr = table.insertRow(-1);
 
-	for (var i = 0; i < col.length; i++) {
-		var th = document.createElement("th");
+	for (let i = 0; i < col.length; i++) {
+		let th = document.createElement("th");
 		th.innerHTML = col[i];
 		tr.appendChild(th);
 	}
 
-	for (var i = 0; i < list.length; i++) {
+	for (let i = 0; i < list.length; i++) {
 		tr = table.insertRow(-1);
-		for (var j = 0; j < col.length; j++) {
-			var cell = tr.insertCell(-1);
+		for (let j = 0; j < col.length; j++) {
+			let cell = tr.insertCell(-1);
 			cell.innerHTML = list[i][col[j]];
 		}
 	}
 
-	var output = document.getElementById("instructorOut");
-	output.innerHTML = "Results ordered by overall average from low to high:";
+	let output = document.getElementById(elementId);
+	let textResult = "";
+	if (list.length === 0) {
+		textResult = "No matches were found for your query."
+	} else if (elementId === "roomsOut") {
+		textResult = "Rooms matching specified criteria:";
+	} else {
+		textResult = "Results ordered by overall average from low to high:";
+	}
+	output.innerHTML = textResult;
 	output.appendChild(table);
 }
 
