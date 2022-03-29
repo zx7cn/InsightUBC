@@ -47,8 +47,8 @@ export default class Server {
 					// preload courses and rooms datasets for C3 frontend Demo
 					const datasetContents = new Map<string, string>();
 					const datasetsToLoad: {[key: string]: string} = {
-						courses: "./test/resources/archives/courses.zip",
-						rooms: "./test/resources/archives/rooms.zip"
+						courses: "./src/archives/courses.zip",
+						rooms: "./src/archives/rooms.zip"
 					};
 					for (const key of Object.keys(datasetsToLoad)) {
 						const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
