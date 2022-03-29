@@ -6,12 +6,12 @@ import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
 import * as fs from "fs-extra";
 
 
-let insightFacade: InsightFacade;
+// let insightFacade: InsightFacade;
 export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
-	private insightFacade: InsightFacade;
+	private static insightFacade: InsightFacade;
 
 	constructor(port: number) {
 		console.info(`Server::<init>( ${port} )`);
@@ -20,7 +20,7 @@ export default class Server {
 
 		this.registerMiddleware();
 		this.registerRoutes();
-		this.insightFacade = new InsightFacade();
+		Server.insightFacade = new InsightFacade();
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
@@ -54,11 +54,11 @@ export default class Server {
 						const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
 						datasetContents.set(key, content);
 					}
-					this.insightFacade.addDataset(
+					Server.insightFacade.addDataset(
 						"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).then((r) => {
 						// console.log("loaded courses");
 					});
-					this.insightFacade.addDataset(
+					Server.insightFacade.addDataset(
 						"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).then((r) => {
 						// console.log("loaded rooms");
 						resolve();
@@ -138,7 +138,7 @@ export default class Server {
 	private static putDataset(req: Request, res: Response) {
 		try {
 			if(req.params.kind === "courses") {
-				insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
+				Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
 					, InsightDatasetKind.Courses)
 					.then((arr) => {
 						res.status(200).json({result: arr});
@@ -146,7 +146,7 @@ export default class Server {
 						res.status(400).json({error: err});
 					});
 			} else if(req.params.kind === "rooms") {
-				insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
+				Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
 					, InsightDatasetKind.Rooms)
 					.then((arr) => {
 						res.status(200).json({result: arr});
@@ -161,7 +161,7 @@ export default class Server {
 
 	private static deleteDataset(req: Request, res: Response) {
 		try {
-			insightFacade.removeDataset(req.params.id).then((str) => {
+			Server.insightFacade.removeDataset(req.params.id).then((str) => {
 				res.status(200).json({result: str});
 			}).catch((err) => {
 				if(err instanceof InsightError) {
@@ -177,7 +177,7 @@ export default class Server {
 
 	private static postQuery(req: Request, res: Response) {
 		try {
-			insightFacade.performQuery(req.body).then((arr) => {
+			Server.insightFacade.performQuery(req.body).then((arr) => {
 				res.status(200).json({result: arr});
 			}).catch((err) => {
 				res.status(400).json({error: err.message});
@@ -190,7 +190,7 @@ export default class Server {
 
 	private static getDataset(req: Request, res: Response) {
 		try {
-			insightFacade.listDatasets().then((arr) => {
+			Server.insightFacade.listDatasets().then((arr) => {
 				res.status(200).json({result: arr});
 			});
 		} catch (err) {
