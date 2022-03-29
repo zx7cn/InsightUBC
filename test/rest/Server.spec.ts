@@ -52,5 +52,24 @@ describe("Facade D3", function () {
 		}
 	});
 
+	// it("PUT test for courses dataset", function () {
+	// 	try {
+	// 		return chai.request(SERVER_URL)
+	// 			.put(ENDPOINT_URL)
+	// 			.send(ZIP_FILE_DATA)
+	// 			.set("Content-Type", "application/x-zip-compressed")
+	// 			.then(function (res: ChaiHttp.Response) {
+	// 				console.log(res);
+	// 				expect(res.status).to.be.equal(200);
+	// 			})
+	// 			.catch(function (err) {
+	// 				console.log(err);
+	// 				expect.fail();
+	// 			});
+	// 	} catch (err) {
+	// 		console.log(err);
+	// 	}
+	// });
+
 	// The other endpoints work similarly. You should be able to find all instructions at the chai-http documentation
 });
