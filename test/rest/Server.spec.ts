@@ -37,7 +37,7 @@ describe("Facade D3", function () {
 		try {
 			return chai.request("http://localhost:4321")
 				.put("/dataset/courses/courses")
-				.send("./test/resources/archives/courses.zip")
+				.send("./src/archives/courses.zip")
 				.set("Content-Type", "application/x-zip-compressed")
 				.then(function (res: ChaiHttp.Response) {
 					console.log(res);
