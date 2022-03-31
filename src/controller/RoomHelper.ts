@@ -36,28 +36,30 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 	return new Promise<InsightResult[]>((resolve, reject) => {
 		try {
 			zip.loadAsync(content, {base64: true}).then(function (data) {
+				if (zip.folder("rooms")?.file("index.htm") == null) {
+					reject(new InsightError("Invalid Building File"));
+				}
 				return zip.folder("rooms")?.file("index.htm")?.async("string").then(function (index: string) {
 					return parse5.parse(index);
 				}).then((parsedIndex) => {
 					let buildingTbody = traverse(parsedIndex, "tbody");
 					for (let node of buildingTbody.childNodes) {
 						if (node.nodeName === "tr") {
-							for(let i of node.childNodes) {
-								if(i.nodeName === "td" && i.attrs) {
-									if(i.attrs[0].value === "views-field views-field-field-building-code") {
+							for (let i of node.childNodes) {
+								if (i.nodeName === "td" && i.attrs) {
+									if (i.attrs[0].value === "views-field views-field-field-building-code") {
 										buildingCode = i.childNodes[0].value.toString().trim();
-									}
-									if(i.attrs[0].value === "views-field views-field-title") {
+									} else if (i.attrs[0].value === "views-field views-field-title") {
 										buildingName = i.childNodes[1].childNodes[0].value.toString().trim();
-									}
-									if(i.attrs[0].value === "views-field views-field-field-building-address") {
+									} else if (i.attrs[0].value === "views-field views-field-field-building-address") {
 										buildingAddress = i.childNodes[0].value.toString().trim();
-									}
-									if(i.attrs[0].value === "views-field views-field-nothing") {
+									} else if (i.attrs[0].value === "views-field views-field-nothing") {
 										buildingLink = i.childNodes[1].attrs[0].value.toString().trim();
 									}
-									building = {fullname: buildingName, shortname: buildingCode,
-										address: buildingAddress, href: buildingLink};
+									building = {
+										fullname: buildingName, shortname: buildingCode,
+										address: buildingAddress, href: buildingLink
+									};
 								}
 							}
 							buildingSet.push(building);
@@ -95,6 +97,8 @@ function getRooms(content: string): Promise<InsightResult[]> {
 			}).catch((e: any) => {
 				reject(new InsightError("Error getting rooms"));
 			});
+		}).catch((e: any) => {
+			reject(new InsightError(e.message));
 		});
 	});
 }

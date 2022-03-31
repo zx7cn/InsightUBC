@@ -12,7 +12,7 @@ export default class Server {
 	private express: Application;
 	private server: http.Server | undefined;
 	private static insightFacade: InsightFacade;
-	private demo: boolean = true;
+	private demo: boolean = false;
 
 	constructor(port: number) {
 		console.info(`Server::<init>( ${port} )`);
