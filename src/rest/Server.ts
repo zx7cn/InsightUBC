@@ -148,8 +148,8 @@ export default class Server {
 				}).catch((err) => {
 					res.status(400).json({error: err.message});
 				});
-		} catch(err: any) {
-			res.status(400).json({error: err.message});
+		} catch(err) {
+			res.status(400).json({error: err});
 		}
 	}
 
@@ -164,8 +164,8 @@ export default class Server {
 					res.status(404).json({error: err.message});
 				}
 			});
-		} catch (err: any) {
-			res.status(400).json({error: err.message});
+		} catch (err) {
+			res.status(400).json({error: err});
 		}
 	}
 
@@ -176,8 +176,8 @@ export default class Server {
 			}).catch((err) => {
 				res.status(400).json({error: err.message});
 			});
-		} catch(err: any) {
-			res.status(400).json({error: err.message});
+		} catch(err) {
+			res.status(400).json({error: err});
 		}
 	}
 
@@ -187,8 +187,8 @@ export default class Server {
 			Server.insightFacade.listDatasets().then((arr) => {
 				res.status(200).json({result: arr});
 			});
-		} catch (err: any) {
-			res.status(400).json({error: err.message});
+		} catch (err) {
+			res.status(400).json({error: err});
 		}
 	}
 }
