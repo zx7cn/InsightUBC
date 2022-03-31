@@ -2,7 +2,7 @@ import express, {Application, Request, Response} from "express";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
-import {InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
+import {InsightDatasetKind, InsightError, NotFoundError, ResultTooLargeError} from "../controller/IInsightFacade";
 import * as fs from "fs-extra";
 
 
@@ -24,6 +24,7 @@ export default class Server {
 		Server.insightFacade = new InsightFacade();
 
 		if (this.demo) {
+			console.log(this.demo);
 			// preload courses and rooms datasets for C3 frontend Demo
 			const datasetContents = new Map<string, string>();
 			const datasetsToLoad: {[key: string]: string} = {
@@ -146,7 +147,11 @@ export default class Server {
 				.then((arr) => {
 					res.status(200).json({result: arr});
 				}).catch((err) => {
-					res.status(400).json({error: err.message});
+					if(err instanceof InsightError) {
+						res.status(400).json({error: err.message});
+					} else {
+						res.status(400).json({error: err});
+					}
 				});
 		} catch(err) {
 			res.status(400).json({error: err});
@@ -160,8 +165,10 @@ export default class Server {
 			}).catch((err) => {
 				if(err instanceof InsightError) {
 					res.status(400).json({error: err.message});
-				} else {
+				} else if (err instanceof NotFoundError) {
 					res.status(404).json({error: err.message});
+				} else {
+					res.status(400).json({error: err});
 				}
 			});
 		} catch (err) {
@@ -174,7 +181,13 @@ export default class Server {
 			Server.insightFacade.performQuery(req.body).then((arr) => {
 				res.status(200).json({result: arr});
 			}).catch((err) => {
-				res.status(400).json({error: err.message});
+				if(err instanceof InsightError) {
+					res.status(400).json({error: err.message});
+				} else if (err instanceof ResultTooLargeError) {
+					res.status(404).json({error: err.message});
+				} else {
+					res.status(400).json({error: err});
+				}
 			});
 		} catch(err) {
 			res.status(400).json({error: err});
