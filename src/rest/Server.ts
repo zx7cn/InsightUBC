@@ -12,6 +12,7 @@ export default class Server {
 	private express: Application;
 	private server: http.Server | undefined;
 	private static insightFacade: InsightFacade;
+	private demo: boolean = false;
 
 	constructor(port: number) {
 		console.info(`Server::<init>( ${port} )`);
@@ -22,24 +23,26 @@ export default class Server {
 		this.registerRoutes();
 		Server.insightFacade = new InsightFacade();
 
-		// preload courses and rooms datasets for C3 frontend Demo
-		const datasetContents = new Map<string, string>();
-		const datasetsToLoad: {[key: string]: string} = {
-			courses: "./src/archives/courses.zip",
-			rooms: "./src/archives/rooms.zip"
-		};
-		for (const key of Object.keys(datasetsToLoad)) {
-			const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
-			datasetContents.set(key, content);
+		if (this.demo) {
+			// preload courses and rooms datasets for C3 frontend Demo
+			const datasetContents = new Map<string, string>();
+			const datasetsToLoad: {[key: string]: string} = {
+				courses: "./src/archives/courses.zip",
+				rooms: "./src/archives/rooms.zip"
+			};
+			for (const key of Object.keys(datasetsToLoad)) {
+				const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
+				datasetContents.set(key, content);
+			}
+			Server.insightFacade.addDataset(
+				"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
+				// pass - dataset persists from before
+			});
+			Server.insightFacade.addDataset(
+				"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).catch((error) => {
+				// pass - dataset persists from before
+			});
 		}
-		Server.insightFacade.addDataset(
-			"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
-				// pass - dataset persists from before
-		});
-		Server.insightFacade.addDataset(
-			"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).catch((error) => {
-				// pass - dataset persists from before
-		});
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
@@ -138,25 +141,15 @@ export default class Server {
 
 	private static putDataset(req: Request, res: Response) {
 		try {
-			if(req.params.kind === "courses") {
-				Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
-					, InsightDatasetKind.Courses)
-					.then((arr) => {
-						res.status(200).json({result: arr});
-					}).catch((err) => {
-						res.status(400).json({error: err});
-					});
-			} else if(req.params.kind === "rooms") {
-				Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
-					, InsightDatasetKind.Rooms)
-					.then((arr) => {
-						res.status(200).json({result: arr});
-					}).catch((err) => {
-						res.status(400).json({error: err});
-					});
-			}
-		} catch(err) {
-			res.status(400).json({error: err});
+			Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
+				, req.params.kind as InsightDatasetKind)
+				.then((arr) => {
+					res.status(200).json({result: arr});
+				}).catch((err) => {
+					res.status(400).json({error: err.message});
+				});
+		} catch(err: any) {
+			res.status(400).json({error: err.message});
 		}
 	}
 
@@ -166,13 +159,13 @@ export default class Server {
 				res.status(200).json({result: str});
 			}).catch((err) => {
 				if(err instanceof InsightError) {
-					res.status(400).json({error: err});
+					res.status(400).json({error: err.message});
 				} else {
-					res.status(404).json({error: err});
+					res.status(404).json({error: err.message});
 				}
 			});
-		} catch (err) {
-			res.status(400).json({error: err});
+		} catch (err: any) {
+			res.status(400).json({error: err.message});
 		}
 	}
 
@@ -194,8 +187,8 @@ export default class Server {
 			Server.insightFacade.listDatasets().then((arr) => {
 				res.status(200).json({result: arr});
 			});
-		} catch (err) {
-			res.status(400).json({error: err});
+		} catch (err: any) {
+			res.status(400).json({error: err.message});
 		}
 	}
 }
