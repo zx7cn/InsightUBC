@@ -54,7 +54,7 @@ function buildResponse(inputAST: AST, queryDataset: string, datasets: Map<string
 		returnSet.sort(sortSections(orderKeys, dir));
 	}
 
-	console.log(returnSet);
+	// console.log(returnSet);
 
 	return returnSet;
 }

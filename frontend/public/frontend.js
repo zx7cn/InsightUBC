@@ -6,12 +6,12 @@ function findRooms() {
 	let furn_type = document.getElementById("furn_type").value
 	let min_seats = document.getElementById("room_cap").value
 
-	if (min_seats.match(/^[0-9]+$/)) {
-		min_seats = parseInt(min_seats)
+	if (min_seats.trim() !== "" && !isNaN(min_seats)) {
+		min_seats = Number(min_seats);
 	}
 
 	let xhr = new XMLHttpRequest();
-	xhr.open("POST", "http://localhost:4321/query");
+	xhr.open("POST", "./query");
 
 	xhr.setRequestHeader("Content-Type", "application/json");
 
@@ -62,7 +62,7 @@ function findInstructors() {
 	let course_dept = document.getElementById("course_dept").value.toLowerCase();
 	let course_id = document.getElementById("course_id").value;
 	let xhr = new XMLHttpRequest();
-	xhr.open("POST", "http://localhost:4321/query");
+	xhr.open("POST", "./query");
 
 	xhr.setRequestHeader("Content-Type", "application/json");
 

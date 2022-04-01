@@ -17,7 +17,7 @@ chai.use(chaiAsPromised);
 describe("InsightFacade", function () {
 	let insightFacade: InsightFacade;
 
-	const persistDir = "./data";
+	const persistDir = "./data/";
 	const datasetContents = new Map<string, string>();
 
 	// Reference any datasets you've added to test/resources/archives here and they will
@@ -306,6 +306,54 @@ describe("InsightFacade", function () {
 			"Dynamic InsightFacade PerformQuery tests",
 			(input) => insightFacade.performQuery(input),
 			"./test/resources/queries",
+			{
+				errorValidator: (error): error is PQErrorKind =>
+					error === "ResultTooLargeError" || error === "InsightError",
+				assertOnError(actual, expected) {
+					if (expected === "ResultTooLargeError") {
+						expect(actual).to.be.instanceof(ResultTooLargeError);
+					} else {
+						expect(actual).to.be.instanceof(InsightError);
+					}
+				},
+				assertOnResult(actual, expected) {
+					expect(actual).to.have.deep.members(expected);
+				},
+			}
+		);
+	});
+
+	describe("PerformQuery from Disk", () => {
+		before(function () {
+			console.info(`Before: ${this.test?.parent?.title}`);
+
+			this.timeout(10000);
+
+			insightFacade = new InsightFacade();
+
+			// Load the datasets specified in datasetsToQuery and add them to InsightFacade.
+			// Will *fail* if there is a problem reading ANY dataset.
+			const loadDatasetPromises = [
+				insightFacade.addDataset("courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses),
+				insightFacade.addDataset("rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms),
+			];
+
+			return Promise.all(loadDatasetPromises).then((r) => {
+				insightFacade = new InsightFacade();
+			});
+		});
+
+		after(function () {
+			console.info(`After: ${this.test?.parent?.title}`);
+			fs.removeSync(persistDir);
+		});
+
+		type PQErrorKind = "ResultTooLargeError" | "InsightError";
+
+		folderTest<unknown, Promise<InsightResult[]>, PQErrorKind>(
+			"Dynamic InsightFacade PerformQuery tests",
+			(input) => insightFacade.performQuery(input),
+			"./test/resources/queriesFromDisk",
 			{
 				errorValidator: (error): error is PQErrorKind =>
 					error === "ResultTooLargeError" || error === "InsightError",
