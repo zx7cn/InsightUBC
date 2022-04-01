@@ -36,7 +36,7 @@ export default class Server {
 				datasetContents.set(key, content);
 			}
 			Server.insightFacade.addDataset(
-				"coursesDemo", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
+				"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
 				// pass - dataset persists from before
 			});
 			Server.insightFacade.addDataset(
