@@ -28,11 +28,6 @@ function traverse(node: any, targetNode: string): any {
 function getBuildings(content: string): Promise<InsightResult[]> {
 	let zip = new JSZip();
 	let buildingSet: InsightResult[] = [];
-	let buildingCode: string;
-	let buildingName: string;
-	let buildingAddress: string;
-	let buildingLink: string;
-	let building: InsightResult;
 	return new Promise<InsightResult[]>((resolve, reject) => {
 		try {
 			zip.loadAsync(content, {base64: true}).then(function (data) {
@@ -45,6 +40,10 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 					let buildingTbody = traverse(parsedIndex, "tbody");
 					for (let node of buildingTbody.childNodes) {
 						if (node.nodeName === "tr") {
+							let buildingCode = "";
+							let buildingName = "";
+							let buildingAddress = "";
+							let buildingLink = "";
 							for (let i of node.childNodes) {
 								if (i.nodeName === "td" && i.attrs) {
 									if (i.attrs[0].value === "views-field views-field-field-building-code") {
@@ -56,12 +55,12 @@ function getBuildings(content: string): Promise<InsightResult[]> {
 									} else if (i.attrs[0].value === "views-field views-field-nothing") {
 										buildingLink = i.childNodes[1].attrs[0].value.toString().trim();
 									}
-									building = {
-										fullname: buildingName, shortname: buildingCode,
-										address: buildingAddress, href: buildingLink
-									};
 								}
 							}
+							let building: InsightResult = {
+								fullname: buildingName, shortname: buildingCode,
+								address: buildingAddress, href: buildingLink
+							};
 							buildingSet.push(building);
 						}
 					}
@@ -108,11 +107,6 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 	bLat: number, bLon: number): Promise<any> {
 	let parsedRooms: any[] = [];
 	let zip = new JSZip();
-	let roomNumber: string;
-	let roomSeats: number;
-	let roomFurniture: string;
-	let roomType: string;
-	let roomLink: string;
 	let room: InsightResult;
 	try {
 		return zip.loadAsync(content, {base64: true}).then((data) => {
@@ -122,6 +116,11 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 				if(traverse(parsedRoom, "tbody") !== null) {
 					for (let node of traverse(parsedRoom, "tbody").childNodes) {
 						if (node.nodeName === "tr") {
+							let roomNumber = "";
+							let roomSeats = 0;
+							let roomFurniture = "";
+							let roomType = "";
+							let roomLink = "";
 							for(let i of node.childNodes) {
 								if(i.nodeName === "td" && i.attrs) {
 									if(i.attrs[0].value === "views-field views-field-field-room-number") {
@@ -135,12 +134,12 @@ function parseRooms(content: string, bFullname: string, bShortname: string, bAdd
 									} else if(i.attrs[0].value === "views-field views-field-nothing") {
 										roomLink = i.childNodes[1].attrs[0].value.toString().trim();
 									}
-									room = {fullname: bFullname, shortname: bShortname, number: roomNumber,
-										name: bShortname + "_" + roomNumber, address: bAddress, lat: bLat,
-										lon: bLon, seats: roomSeats, type: roomType, furniture: roomFurniture,
-										href: roomLink};
 								}
 							}
+							room = {fullname: bFullname, shortname: bShortname, number: roomNumber,
+								name: bShortname + "_" + roomNumber, address: bAddress, lat: bLat,
+								lon: bLon, seats: roomSeats, type: roomType, furniture: roomFurniture,
+								href: roomLink};
 							parsedRooms.push(room);
 						}
 					}
