@@ -12,7 +12,7 @@ export default class Server {
 	private express: Application;
 	private server: http.Server | undefined;
 	private static insightFacade: InsightFacade;
-	private demo: boolean = true;
+	// private demo: boolean = true;
 
 	constructor(port: number) {
 		console.info(`Server::<init>( ${port} )`);
@@ -23,27 +23,27 @@ export default class Server {
 		this.registerRoutes();
 		Server.insightFacade = new InsightFacade();
 
-		if (this.demo) {
-			console.log(this.demo);
-			// preload courses and rooms datasets for C3 frontend Demo
-			const datasetContents = new Map<string, string>();
-			const datasetsToLoad: {[key: string]: string} = {
-				courses: "./src/archives/courses.zip",
-				rooms: "./src/archives/rooms.zip"
-			};
-			for (const key of Object.keys(datasetsToLoad)) {
-				const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
-				datasetContents.set(key, content);
-			}
-			Server.insightFacade.addDataset(
-				"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
-				// pass - dataset persists from before
-			});
-			Server.insightFacade.addDataset(
-				"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).catch((error) => {
-				// pass - dataset persists from before
-			});
-		}
+		// if (this.demo) {
+		// 	console.log(this.demo);
+		// 	// preload courses and rooms datasets for C3 frontend Demo
+		// 	const datasetContents = new Map<string, string>();
+		// 	const datasetsToLoad: {[key: string]: string} = {
+		// 		courses: "./src/archives/courses.zip",
+		// 		rooms: "./src/archives/rooms.zip"
+		// 	};
+		// 	for (const key of Object.keys(datasetsToLoad)) {
+		// 		const content = fs.readFileSync(datasetsToLoad[key]).toString("base64");
+		// 		datasetContents.set(key, content);
+		// 	}
+		// 	Server.insightFacade.addDataset(
+		// 		"courses", datasetContents.get("courses") ?? "", InsightDatasetKind.Courses).catch((error) => {
+		// 		// pass - dataset persists from before
+		// 	});
+		// 	Server.insightFacade.addDataset(
+		// 		"rooms", datasetContents.get("rooms") ?? "", InsightDatasetKind.Rooms).catch((error) => {
+		// 		// pass - dataset persists from before
+		// 	});
+		// }
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
@@ -142,7 +142,7 @@ export default class Server {
 
 	private static putDataset(req: Request, res: Response) {
 		try {
-			Server.insightFacade.addDataset(req.params.id, (req.body as Buffer).toString("base64")
+			Server.insightFacade.addDataset(req.params.id, Buffer.from(req.body).toString("base64")
 				, req.params.kind as InsightDatasetKind)
 				.then((arr) => {
 					res.status(200).json({result: arr});
